@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapter 01: Introduction</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapter 01: Introduction</h1>
+        <p><sub>Cette présentation est basée sur les diapositives de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapter 01: Introduction</h2>
+        <p><strong>Premier objectif</strong> : Renforcer et appliquer les connaissances acquises</p>
+        <p><strong>Deuxième objectif</strong> : Structuration d’une application en procédures</p>
+        <p><strong>Troisième objectif</strong> : Autonomie en programmation, de la définition du problème à
+            l’utilisation du programme</p>
+        <p>En bref . . . Pour réussir, il faudra pouvoir programmer et spécifier !</p>
+    </section>
+
+    <section class="slide">
+        <h3>Le moyen</h3>
+        <p>Programmation fonctionnelle en Scheme (Exercices !)</p>
+        <p>
+            Référence: <br />
+            P. Gribomont, <br />
+            <em>Eléments de programmation en Scheme,</em> <br />
+            Dunod, Paris, 2000. <br />
+            <a href="https://people.montefiore.uliege.be/gribomon/cours/el/nel2a.pdf" target="_blank">(version en
+                ligne)</a>
+        </p>
+
+        <p>
+            Complément très utile : <br />
+            L. Moreau, C. Queinnec, D. Ribbens et M. Serrano, <br />
+            <em>Recueil de petits problèmes en Scheme,</em> <br />
+            Springer, collection Scopos, 1999.
+
+        </p>
+
+        <p>
+            Complément : <br />
+            G. J. Sussman et H. Abelson, <br />
+            <em>Structure and Interpretation of Computer Programs,</em> <br />
+            MIT Press, 1996. <br />
+            <a href="https://mitpress.mit.edu/sites/default/files/sicp/index.html" target="_blank">(version en
+                ligne)</a>
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Pourquoi la programmation fonctionnelle ?</h3>
+        <ul>
+            <li>Bon rapport simplicité généralité</li>
+            <li>Plus “naturel” que l’approche impérative — Favorise la construction et la maintenance</li>
+        </ul>
+        <h3>Pourquoi un nouveau langage ?</h3>
+        <ul>
+            <li>L’important est la programmation, pas le langage . . . donc il faut pouvoir changer de langage</li>
+            <li><code>C</code> comporte des lacunes gênantes (procédures, structures de données, . . .)</li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Pourquoi <code>Scheme</code> (dialecte de <code>Lisp</code>) ?</h3>
+        <ul>
+            <li>Scheme est très simple !</li>
+            <li>Scheme est puissant</li>
+            <li>Scheme comble des lacunes de C</li>
+            <li>Scheme est un langage et un métalangage</li>
+        </ul>
+        <p class="note">
+            Remarque. Tout est relatif ; Scheme est simple, si on considère la puissance du langage ! Bien comprendre le système est
+            difficile, même si on se limite à un sous-ensemble du langage. Obtenir une implémentation efficace en mémoire et en
+            temps est très difficile.
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3><code>C</code> et <code>Scheme</code> (<code>Pascal</code> et <code>Lisp</code>)</h3>
+        <blockquote>
+            <p>Pascal is for building pyramids — imposing, breathtaking, static structures built by armies pushing heavy blocks into place. Lisp is for building organisms — imposing, breathtaking, dynamic structures built by squads fitting fluctuating myriads of simpler organisms into place.</p>
+            <p style="text-align:right">Alan J. PERLIS<br />Premier lauréat du prix TURING</p>
+        </blockquote>
+        <p>(Avant-propos de <em>Structure and Interpretation of Computer Programs</em>, par Abelson et Sussman, MIT Press &amp; McGraw-Hill, 1985)</p>
+    </section>
+
+
+    <div class="progress"></div>
+
+    <script src="shower/shower.min.js"></script>
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+</body>
+
+</html>
