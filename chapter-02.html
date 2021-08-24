@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 02: Les bases de Scheme</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 02: Les bases de Scheme</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 02: Les bases de Scheme</h2>
+        <p>Interpréteur : boucle <strong>Read</strong>-<strong>Eval</strong>-<strong>Print</strong>.</p>
+        <p>L’interpréteur <strong>lit</strong> une expression $e$, l’<strong>évalue</strong> et <strong>imprime</strong>
+            sa valeur $[[e]]$ (ou un message spécifique).</p>
+        <p>Il peut aussi <strong>lire</strong> une “définition” et l’enregistrer.</p>
+
+        <br /><br /><br />
+        <p class="note"><sub>Au lieu de <code>print</code>, j'utilise dans mes exemples la function <code>write</code>
+                pour montrer les valeurs renvoyer par les fonctions. Vous pouvez le configurer dans Dr. Racket : "Choose
+                Language", "The Racket Language", et puis "Show details".</sub></p>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <ul>
+            <li>
+                Une expression <em>simple</em> est une constante (numérique ou non) ou une variable.
+                <pre class="input"><code class="language-scheme">&gt; 2</code></pre>
+                <pre class="output"><code class="language-">2</code></pre>
+                <hr />
+                <pre class="input"><code class="language-scheme">&gt; (define foo 5)
+&gt; foo</code></pre>
+                <pre class="output"><code class="language-">2</code></pre>
+            </li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <ul>
+            <li>
+                <p>
+                    Une expression composée, ou <em>combinaison</em>, comporte un opérateur et des arguments ; les
+                    composants sont eux-mêmes des expressions, simples ou composées. Une combinaison commence par “(” et
+                    finit par “)”.
+                </p>
+                <pre class="input"><code class="language-scheme">&gt; (+ 2 5)</code></pre>
+                <pre class="output"><code class="language-">7</code></pre>
+
+                <p>
+                    On utilise systématiquement la forme préfixée.
+                </p>
+                <p>Cette notation implique que (+ 2 5) est une expression, et
+                    que sa valeur, calculée par l’interpréteur Scheme, est 7.
+                    On écrit [[(+ 2 5)]] = 7.</p>
+            </li>
+        </ul>
+
+
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <ul>
+            <li>Le langage des expressions est inclus dans celui des valeurs (en arithmétique, c’est le
+                contraire).
+                <pre class="input"><code class="language-scheme">&gt; '(+ 1 2 3)</code></pre>
+                <pre class="output"><code class="language-">(+ 1 2 3)</code></pre>
+                <hr />
+                <pre class="input"><code class="language-scheme">&gt; (eval '(+ 1 2 3))</code></pre>
+                <pre class="output"><code class="language-">6</code></pre>
+            </li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <pre class="input"><code class="language-scheme">&gt; (+ (* 3 -2) (- 5 3))</code></pre>
+        <pre class="output"><code class="language-">-4</code></pre>
+        <p><code>3</code>, <code>-2</code> et <code>5</code> sont des expressions simples (nombres) à partir desquelles
+            on forme les combinaisons <code>(* 3 -2)</code> et <code>(- 5 3)</code>, puis la combinaison
+            <code>(+ (* 3 -2) (- 5 3))</code>.
+        </p>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; (/ 8 5)</code></pre>
+        <pre class="output"><code class="language-">8/5</code></pre>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; (/ 8.0 5)</code></pre>
+        <pre class="output"><code class="language-">1.6</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <pre class="input"><code class="language-scheme">&gt; (/ 8 3.0)</code></pre>
+        <pre class="output"><code class="language-">2.6666666666666665</code></pre>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; (/ 2 0)</code></pre>
+        <pre class="error"><code class="language-">/: division by zero</code></pre>
+        <p>La valeur de <code>(/ 2 0)</code> n’existe pas.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <pre class="input"><code class="language-scheme">&gt; 3</code></pre>
+        <pre class="output"><code class="language-">3</code></pre>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; +</code></pre>
+        <pre class="output"><code class="language-">#&lt;procedure:+&gt;</code></pre>
+        <p>La valeur de <code>+</code> existe et est une procédure (ou fonction).</p>
+        <p>Les valeurs fonctionnelles ne sont pas affichables.</p>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; pi</code></pre>
+        <pre class="output"><code class="language-">3.141592653589793</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions</h3>
+        <pre class="input"><code class="language-scheme">&gt; (require math) ; load mathematical functions
+factorial</code></pre>
+        <pre class="output"><code class="language-">#&lt;procedure:factorial+&gt;</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; fictorial</code></pre>
+        <pre class="error"><code class="language-">fictorial: undefined;</code></pre>
+        <hr />
+        <pre class="input"><code class="language-scheme">&gt; (2 3)</code></pre>
+        <pre class="error"><code class="language-">application: not a procedure;</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions - Remarques</h3>
+        <p class="note">La notation Scheme est plus homogène que les notations mathématiques usuelles, où les
+            foncteurs s’emploient de manière préfixée, infixée ou postfixée, ou encore font l’objet de conventions
+            d’écriture spéciales.</p>
+        <p class="note">Dans la session ci-dessus, on suppose que <code>pi</code> et <code>factorial</code> ont été
+            définis (par exemeple par l’utilisateur--
+            on verra comment plus loin), tandis que <code>fictorial</code> n’a pas été défini. Les nombres et opérations
+            classiques sont
+            naturellement prédéfinis.</p>
+        <p class="note">Les messages peuvent varier d’un évaluateur à l’autre, et être plus ou moins
+            informatifs. Un “message d’erreur” peut ne pas comporter le mot <code>error</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions - Remarques</h3>
+        <p class="note">La structure arborescente des expressions se prête à une définition dans le formalisme BNF.
+            En se restreignant aux expressions arithmétiques, on a</p>
+
+        <pre><code class="language-bnf">&lt;A-expression&gt; ::= &lt;nombre&gt; | &lt;variable&gt; | &lt;combinaison&gt; 
+&lt;combinaison&gt; ::= ( &lt;A-op&gt; [ &lt;A-expression&gt; ]* )
+&lt;A-op&gt; ::= '+' | '-' | '*' | '/'</code></pre>
+
+        <p class="note">On voit qu’une combinaison est un assemblage composé (dans l’ordre), d’une parenthèse
+            ouvrante, d’un opérateur arithmétique, d’un certain nombre (0, 1 ou plus) d’expressions arithmétiques
+            et d’une parenthèse fermante.</p>
+    </section>
+
+    <section class="slide">
+        <h3><code>define</code> = liaison à une valeur</h3>
+        <p>"Définition" du nombre $\pi$ et de son inverse :</p>
+        <pre class="input"><code class="language-scheme">&gt; (define pi 3.14159265358979)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (define invpi (/ 1 pi))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; invpi</code></pre>
+        <pre class="output"><code class="language-">0.3183098861837907</code></pre>
+
+        <p><sub>
+                L’évaluation de l’expression <code class="language-scheme">(define symb e)</code> peut provoquer
+                l’impression du message
+                <code>symb</code>
+                (ce n’est pas à proprement parler une valeur, c’est pourquoi nous préférons "..."). L’important est la
+                liaison du symbole "défini" <code>symb</code> à la valeur de l’expression <code>e</code> ; ce n’est pas
+                la valeuréventuelle de l’expression <code class="language-scheme">(define symb e)</code>.
+            </sub></p>
+    </section>
+
+    <section class="slide">
+        <h3><code>define</code> = liaison à une valeur</h3>
+        <p>Si le symbole <code>pi</code> reçoit une nouvelle valeur (il est “redéfini”), cela n’influera pas sur
+            <code>invpi</code>. En effet, un <code>define</code> lie son premier argument (un symbole) à la valeur
+            de son
+            second argument, telle qu’elle existe au moment où l’expression <code>define</code> est évaluée.
+        </p>
+
+        <pre class="input"><code class="language-scheme">&gt; (define pi 4.0)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; invpi</code></pre>
+        <pre class="output"><code class="language-">0.3183098861837907</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Symboles</h3>
+        <p>Les symboles sont des “mots” qui ne sont pas des nombres. Ils ne peuvent contenir les caractères spéciaux
+            suivants :</p>
+        <p><code>( ) [ ] { } ; , " ' ` # /</code></p>
+        <p>Un symbole est généralement utilisé comme variable ; sa valeur est alors l’objet qui lui est lié (s’il
+            existe).</p>
+        <p>Le caractère spécial <code>'</code> indique que le symbole n’est pas utilisé comme variable ; il est alors sa
+            propre valeur.</p>
+        <p>L’écriture <code>'pi</code> abrège l’écriture <code class="language-scheme">(quote pi)</code>. (Le rôle de
+            quote sera vu plus loin.)
+        </p>
+        <p>On a par exemple [[pi]] = 3.14... et [['pi]] = pi.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Symboles - exemples</h3>
+        <pre class="input"><code class="language-scheme">&gt; pi</code></pre>
+        <pre class="output"><code class="language-">3.141592653589793</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; 'pi</code></pre>
+        <pre class="output"><code class="language-">pi</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (quote pi)</code></pre>
+        <pre class="output"><code class="language-">pi</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; pi.+2</code></pre>
+        <pre class="error"><code class="language-">pi.+2: undefined;</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; 'pi.+2</code></pre>
+        <pre class="output"><code class="language-">pi.+2</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes</h3>
+        <p>Syntaxe. Une liste est une suite d’objets séparés par des blancs, entourée d’une paire de parenthèses (le
+            nombre d’objets est la longueur de la liste). Les listes sont des valeurs ; certaines d’entre elles sont
+            aussi des expressions ; toutes les expressions composées sont des listes.</p>
+
+        <p>La <em>seule</em> liste de longueur 0 est la liste vide <code>()</code>.</p>
+
+        <p>Exemples :</p>
+        <ul>
+            <li><code>()</code></li>
+            <li><code>(* 3)</code></li>
+            <li><code>(5 (+ (d 4)) ())</code></li>
+            <li><code>(+ 3 5)</code></li>
+            <li><code>(define pi 3.14)</code></li>
+            <li>...</li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Constructeurs</h3>
+        <p><code>cons</code> (deux arguments) : Si [[β]] est une liste, alors [[<code
+                class="language-scheme">(cons α β)</code>]] est
+            une liste dont le premier élément est [[α]] et le reste est [[β]].</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (cons 1 (cons 2 (cons 3 '()))))</code></pre>
+        <pre class="output"><code class="language-">(1 2 3)</code></pre>
+
+        <p><code>list</code> (nombre quelconque d’arguments) : [[<code class="language-scheme">(list α1 ... αn)</code>]]
+            est la liste
+            dont les éléments sont (dans l’ordre) [[α1]], ..., [[αn]].</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (list 1 2 3)</code></pre>
+        <pre class="output"><code class="language-">(1 2 3)</code></pre>
+
+        <p>Les fonctions [[<code>cons</code>]] et [[<code>list</code>]] sont <em>injectives</em>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Constructeurs</h3>
+
+        <p><code class="language-scheme">(list α1 α2 ... αn)</code><br />équivaut à<br />
+            <code class="language-scheme">(cons α1 (cons α2 ... (cons αn '())...))</code>
+        </p>
+
+        <pre
+            class="input"><code class="language-scheme">&gt; (equal? (list 1 2 3) (cons 1 (cons 2 (cons 3 '()))))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes</h3>
+        <p>Notation. Une liste non vide dont le premier élément est $x$ et dont le reste est la liste $l$ peut s’écrire
+            $(x . l)$. Les écritures</p>
+
+        <div class="columns two">
+            <ul>
+                <li>(0 1 2)</li>
+                <li>(0 . (1 2))</li>
+                <li>(0 1 . (2))</li>
+                <li>(0 1 2 . ())</li>
+            </ul>
+            <ul>
+                <li>(0 . (1 . (2)))</li>
+                <li>(0 . (1 2 . ()))</li>
+                <li>(0 1 . (2 . ()))</li>
+                <li>(0 . (1 . (2 . ())))</li>
+            </ul>
+        </div>
+
+        <p>représentent toutes la même liste de longueur 3, dont les éléments sont 0, 1 et 2.</p>
+
+        <p>Cette notation sera généralisée plus loin. On note déjà que :</p>
+        <ul>
+            <li>[[<code class="language-scheme">(cons α β)</code>]] = ([[α]] . [[β]])</li>
+            <li>[[<code class="language-scheme">(cons 3 7)</code>]] = (3 . 7) <em>(paire pointée)</em></li>
+        </ul>
+
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Reconnaisseurs de listes</h3>
+
+        <p>Reconnaître une liste : prédicat <code>list?</code> [[<code class="language-scheme">(list? l)</code>]] est
+            vrai si [[l]] est une liste.</p>
+        <pre class="input"><code class="language-scheme">&gt; (list? (cons 1 '()))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (list? (cons 1 2))</code></pre>
+        <pre class="output"><code class="language-">#f</code></pre>
+        <p>Reconnaître la liste vide : prédicat <code>null?</code> [[<code class="language-scheme">(null? l)</code>]]
+            est vrai si [[l]] est ().</p>
+        <pre class="input"><code class="language-scheme">&gt; (null? (list 1 2 3))</code></pre>
+        <pre class="output"><code class="language-">#f</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (null? (list))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Décomposition des listes</h3>
+        <p>Si [[l]] est une liste non vide, son premier élément est [[<code class="language-scheme">(car l)</code>]] ;
+            les éléments restants forment la liste [[<code class="language-scheme">(cdr l)</code>]].</p>
+        <p>On a donc [[l]] = [[<code class="language-scheme">(cons (car l) (cdr l))</code>]].</p>
+        <p>Si [[a]] est un objet et [[l]] une liste, on a :</p>
+        <ul>
+            <li>[[<code class="language-scheme">(cons a l)</code>]] = ([[a]] . [[l]]), et </li>
+            <li>[[<code class="language-scheme">(car (cons a l))</code>]] = [[a]], et</li>
+            <li>[[<code class="language-scheme">(cdr (cons a l))</code>]] = [[l]].</li>
+        </ul>
+
+        <p class="note">Remarque: "A cons cell is composed of two pointers; the car operation extracts the first
+            pointer, and the cdr operation extracts the second." Source: <a
+                href="https://en.wikipedia.org/wiki/CAR_and_CDR" target="_blank">Wikipedia</a></p>
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Décomposition des listes</h3>
+        <pre class="input"><code class="language-scheme">&gt; (define l (list 3 '5 '(6 7) '3a 'define pi))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; l</code></pre>
+        <pre class="output"><code class="language-">(3 5 (6 7) 3a define 3.141592653589793)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (car l)</code></pre>
+        <pre class="output"><code class="language-">3</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (cdr l)</code></pre>
+        <pre class="output"><code class="language-">(5 (6 7) 3a define 3.141592653589793)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes - Décomposition des listes</h3>
+        <pre class="input"><code class="language-scheme">&gt; (cdaddr l)</code></pre>
+        <pre class="output"><code class="language-">(7)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (cdr (car (cdr (cdr l))))</code></pre>
+        <pre class="output"><code class="language-">(7)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (cons '(a b) '(6 7))</code></pre>
+        <pre class="output"><code class="language-">((a b) 6 7)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (cons (car l) (cdr l))</code></pre>
+        <pre class="output"><code class="language-">(3 5 (6 7) 3a define 3.141592653589793)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Cons-cell diagrams</h3>
+        <p>Aussi connu sous le nom <em>box-and-pointer diagrams</em>.</p>
+        <p>Ces diagrammes nous permettent de représenter visuellement des <a
+                href="https://fr.wikipedia.org/wiki/S-expression" target="_blank">expressions symboliques</a>
+            (S-expressions) non-atomiques sous forme d'arbres.</p>
+
+        <p class="note">Toutes les listes sont des expressions symboliques, mais pas toutes les expressions symboliques
+            sont des listes.</p>
+
+        <div class="columns two">
+            <div>
+                <pre class=""><code class="language-scheme">(list 1 2 3)</code></pre>
+                <img src="./chapter-01/image-1.png" alt="Diagramme box-and-pointer pour l'expression (list 1 2 3)" />
+            </div>
+
+            <div>
+                <pre class=""><code class="language-scheme">(cons 1 (cons 2 3))</code></pre>
+                <img src="./chapter-01/image-2.png"
+                    alt="Diagramme box-and-pointer pour l'expression (cons 1 (cons 2 3))" />
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Cons-cell diagrams</h3>
+        <pre class=""><code class="language-scheme">(list 3 '5 '(6 7) '3a 'define pi)</code></pre>
+        <img width="100%" src="./chapter-01/image-3.png"
+            alt="Diagramme box-and-pointer pour l'expression (list 3 '5 '(6 7) '3a 'define pi)" />
+
+        <pre class="input"><code class="language-scheme">&gt; (cdaddr (list 3 '5 '(6 7) '3a 'define pi))</code></pre>
+        <pre class="output"><code class="language-">(7)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Booléens et prédicats</h3>
+
+        <p>Les booléens sont des symboles spéciaux :</p>
+        <p><code class="language-scheme">#t</code> pour <em>true</em> (vrai) et <code class="language-scheme">#f</code>
+            pour <em>false</em> (faux).</p>
+        <p class="note">Remarque. Certains systèmes assimilent <code class="language-scheme">#f</code> et <code
+                class="language-scheme">()</code> (liste vide) ; dans la suite, nous évitons cette assimilation fautive.
+        </p>
+        <p>Les prédicats sont des fonctions prenant leurs valeurs dans les booléens. Beaucoup de prédicats numériques (<code>&lt;</code>, <code>=</code>, <code>zero?</code>, ...) ou non (<code>null?</code>, <code>eq?</code>, <code>equal?</code>, ...) sont prédéfinis.</p>
+        <p>Les reconnaisseurs sont des prédicats à un argument, associés aux différentes catégories d’objets.</p>
+        <p>Voici des reconnaisseurs prédéfinis importants :</p>
+        <p><code>number?</code>, <code>symbol?</code>, <code>boolean?</code>, <code>list?</code>, <code>procedure?</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Booléens et prédicats - Exemples</h3>
+        <pre class="input"><code class="language-scheme">&gt; (&gt; 7 3 -2 -5/2)</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (&gt; 7 -2 3 -5/2)</code></pre>
+        <pre class="output"><code class="language-">#f</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (= (- 3 2) (/ 6 6) 1 (+ 0 1))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (define l (list 1 2 3))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (equal? l (cons (car l) (cdr l)))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Conditionnels</h3>
+        <p>On suppose que, dans l’environnement où les expressions suivantes sont évaluées, <code>pi</code> est défini (c’est-à-dire, lié à une valeur) et que <code>pu</code> ne l’est pas.</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (if (&gt; 5 3) pi pu)</code></pre>
+        <pre class="output"><code class="language-">3.14159265358979</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (if (&gt; 3 5) pi pu)</code></pre>
+        <pre class="error"><code class="language-">pu: undefined;</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (if (&gt; pi pu) 3 4)</code></pre>
+        <pre class="error"><code class="language-">pu: undefined;</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (cond ((&gt; 0 1) (/ 2 0))
+        ((&gt; 1 2) (/ 0 1))
+        ((&gt; 2 0) (/ 1 2)))</code></pre>
+        <pre class="output"><code class="language-">1/2</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Conditionnels</h3>
+        <p>On suppose que, dans l’environnement où les expressions suivantes sont évaluées, <code>pi</code> est défini (c’est-à-dire, lié à une valeur) et que <code>pu</code> ne l’est pas.</p>
+
+        <pre class="input"><code class="language-scheme">(cond)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input"><code class="language-scheme">(cond ((&gt; 0 1) 5))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input"><code class="language-scheme">(cond ((&gt; pi 5) trucmuche)
+      (else 4))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input"><code class="language-scheme">(cond ('trucmuche 3)
+      (else 4))</code></pre>
+        <pre class="output"><code class="language-">1/2</code></pre>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
