@@ -11,3 +11,4 @@ Feel free to ask questions [on GitHub](https://github.com/chrdebru/INFO0054).
 
 * [Chapitre 01: Introduction](chapter-01.html)
 * [Chapitre 02: Les bases de Scheme](chapter-02.html)
+* [Chapitre 03: Règles d’évaluation](chapter-03.html)

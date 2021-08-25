@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 03: Règles d’évaluation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 03: Règles d’évaluation</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 03: Règles d’évaluation</h2>
+
+        <p>La règle d’évaluation des expressions est récursive : <br />l’évaluation d’une expression peut requérir
+            l’évaluation de sous-expressions.</p>
+        <p>Le processus d’évaluation renvoie <em>en général</em> une valeur ; <br />il peut aussi avoir <em>un
+                effet</em> (outre
+            l’affichage de
+            la valeur).</p>
+        <p>Les nombres et les variables sont des cas de base.<br />
+            Les combinaisons sont des cas inductifs.<br />
+            Les formes spéciales sont des cas de base ou des cas inductifs.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Cas de base</h3>
+
+        <ul>
+            <li>L’évaluation d’un nombre donne ce nombre.</li>
+            <li>L’évaluation d’un booléen donne ce booléen.</li>
+            <li>L’évaluation d’un symbole donne la valeur liée à ce symbole, si cette valeur existe et est affichable.
+            </li>
+        </ul>
+
+        <div class="columns two">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; 5/4</code></pre>
+                <pre class="output next"><code class="language-">5/4</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; #f</code></pre>
+                <pre class="output next"><code class="language-">#f</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; pi</code></pre>
+                <pre class="output next"><code class="language-">3.141592653589793</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; pa</code></pre>
+                <pre class="error next"><code class="language-">pa: undefined;</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; +</code></pre>
+                <pre class="output next"><code class="language-">#&lt;procedure:+&gt;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; car</code></pre>
+                <pre class="output next"><code class="language-">#&lt;procedure:car&gt;</code></pre>
+                <pre
+                    class="input next"><code class="language-scheme">&gt; factorial ; assuming (require math)</code></pre>
+                <pre class="output next"><code class="language-">#&lt;procedure:factorial&gt;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; fictorial</code></pre>
+                <pre class="error next"><code class="language-">fictorial: undefined;</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Cas inductif</h3>
+
+        <p>L’expression à évaluer est une liste $(e_0 \ \ldots \ e_n)$.</p>
+
+        <h3>La combinaison</h3>
+        <ol>
+            <li>
+                Les $e_i$ sont évalués (soient $v_i$ les valeurs) ; <br />
+                $v_0$ doit être une fonction dont le domaine contient $(v_1 \ \ldots \ v_n)$.
+            </li>
+            <li>La fonction $v_0$ est appliquée à $(v_1 \ \ldots \ v_n)$.</li>
+            <li>Le résultat est affiché.</li>
+        </ol>
+
+        <p>Une fonction (mathématique) est un ensemble de couples de valeurs ; la première est un élément du domaine, la
+            seconde l’image correspondante.</p>
+        <p>Appliquer une fonction est produire l’image associée à un élément donné du domaine de la fonction.</p>
+        <p>Pour les fonctions prédéfinies (liées à <code>+</code>, <code>cons</code>, etc. dans l’environnement global)
+            le processus d’application
+            est l’exécution du code correspondant à la fonction. Le cas des fonctions définies par l’utilisateur est
+            envisagé plus loin.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Les formes spéciales</h3>
+
+        <p>La syntaxe est celle d’une combinaison, mais chaque forme spéciale a sa propre règle d’évaluation. Les
+            formes spéciales sont identifiées par un mot-clef, qui est le premierélément de l’expression à
+            évaluer.</p>
+
+
+        <p>Liste partielle:
+            <code>define</code>, <code>if</code>, <code>cond</code>, <code>quote</code>, <code>lambda</code>,
+            <code>and</code>, <code>or</code>, <code>let</code>, <code>let*</code>, <code>letrec</code>,
+            ...
+        </p>
+
+        <p class="note">Remarques. Les valeurs des sous-expressions ne sont pas affichées.</p>
+        <p>En cas d’erreur, l’évaluation est interrompue et un message est affiché.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemples de combinaison</h3>
+
+        <p>Les sous-expressions de ces combinaisons sont des nombres, des booléens, des symboles, des formes spéciales
+            ou des combinaisons.</p>
+        <p>Les composants de la combinaison sont évalués (dans un ordre quelconque ou même en parallèle<sup>(*)</sup>),
+            puis la valeur
+            du premier composant est appliquée aux valeurs des composants suivants.</p>
+
+        <p class="note next"><sub>(*) Dans la spécification de la langue Scheme, l'ordre n'est pas specifié (cfr. p. 28
+                de <a href="http://www.r6rs.org/final/r6rs.pdf" target="_blank">R6RS</a>). En Racket, une
+                <em>implementation</em> de la langue Scheme, <a
+                    href="https://docs.racket-lang.org/guide/application.html" target="_blank">l'ordre d'évaluation est
+                    garanti de gauche à droite</a>.</sub> </p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (+ 2 4)</code></pre>
+        <pre class="output next"><code class="language-">6</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (+ (- 5 3) (* 2 2))</code></pre>
+        <pre class="output next"><code class="language-">6</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Exemples de combinaison</h3>
+
+        <pre class="input"><code class="language-scheme">&gt; (cons (car '(5 6)) (cdr (list 7 8 9)))</code></pre>
+        <pre class="output next"><code class="language-">(5 8 9)</code></pre>
+
+        <pre
+            class="input next"><code class="language-scheme">&gt; (car (cons (car '(5 6)) (cdr (list 7 8))))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (car '(5 8 9)) </code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (+ (* 4 (car 5)) 3)</code></pre>
+        <pre class="error next"><code class="language-">car: contract violation
+expected: pair?
+given: 5</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(cond (c1 e1) ... (cn en))</code></h3>
+        <p>Les prédicats $c1, \ldots , cn$ sont évalués en séquence, jusqu’au premier $ck$ dont la valeur n’est pas
+            <code>#f</code> (ce sera le plus souvent <code>#t</code>). La valeur du conditionnel est alors celle de
+            l’expression correspondante $ek$.
+        </p>
+
+        <p>Si tous les prédicats sont évalués à <code>#f</code>, le conditionnel n’a pas de valeur. (C’est généralement
+            lié à une erreur de programmation, même si l’évaluateur n’affiche pas <code>error</code>.) Le dernier
+            prédicat $cn$ peut être le mot-clef else dont la valeur, dans ce contexte, est <code>#t</code>.</p>
+
+        <p><code class="language-scheme">(if e0 e1 e2)</code> abrège <code class="language-scheme">(cond (e0 e1) (else e2))</code>.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (cond)</code></pre>
+        <pre class="error next"><code class="language-">...</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (cond (1 2))</code></pre>
+        <pre class="output next"><code class="language-">2</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(and e1 ... en)</code></h3>
+
+        <p>Les $ei$ sont évalués dans l’ordre et la première valeur fausse est retournée ; les valeurs suivantes ne sont pas
+            calculées. S’il n’y a pas de valeurs fausses, la dernière valeur calculée est retournée. S’il n’y a pas de
+            valeurs du tout, <code>#t</code> est retourné.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and (= 2 2) (&lt; 2 1) (/ 2 0) (+ 2 3))</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and (= 2 2) (+ 2 3) (/ 2 0) (&lt; 2 1))</code></pre>
+        <pre class="error next"><code class="language-">/: division by zero</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and (= 2 2) (&lt; 2 1) (/ 2 0) (+ 2 3))</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and (= 2 2) (+ 2 3))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(and e1 ... en)</code></h3>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and (+ 2 3) (= 2 2))</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (and)</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (if (and (= 2 2) (+ 2 3)) 'vrai 'faux)</code></pre>
+        <pre class="output next"><code class="language-">vrai</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(or e1 ... en)</code></h3>
+
+        <p>Les $ei$ sont évalués dans l’ordre et la première valeur non fausse est retournée ; les valeurs suivantes ne sont
+            pas calculées. S’il n’y a pas de valeurs non fausses, ou pas de valeurs du tout, <code>#f</code> est retourné.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (or (&lt; 2 1) (= 2 2) (/ 2 0) (+ 2 3))</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (or (&lt; 2 1) (+ 2 3) (/ 2 0) (= 2 2))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+        
+        <pre class="input next"><code class="language-scheme">&gt; (or (&lt; 2 1) (/ 2 0) (+ 2 3) (= 2 2))</code></pre>
+        <pre class="error next"><code class="language-">/: division by zero</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (or (= 2 2) (+ 2 3) (&lt; 2 1))</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(or e1 ... en)</code></h3>
+
+        <pre class="input next"><code class="language-scheme">&gt; (or)</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (or #f (&lt; 2 1) #f)</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+        
+        <pre class="input next"><code class="language-scheme">&gt; (if (or (+ 2 3) 1 2) 'vrai 'faux)</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(quote e)</code></h3>
+
+        <p>La valeur est simplement $e$, à ne pas confondre avec la valeur de $e$ ! </p>
+        <p>La forme spéciale <code>(quote e)</code> s’abrège en <code>'e</code>.</p>
+
+        <div class="columns two">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (quote +)</code></pre>
+                <pre class="output next"><code class="language-">+</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; '+</code></pre>
+                <pre class="output next"><code class="language-">+</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; +</code></pre>
+                <pre class="output next"><code class="language-">#&lt;procedure:+&gt;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (quote 3)</code></pre>
+                <pre class="output next"><code class="language-">3</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; '3</code></pre>
+                <pre class="output next"><code class="language-">3</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; 3</code></pre>
+                <pre class="output next"><code class="language-">3</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (quote pi)</code></pre>
+                <pre class="output next"><code class="language-">pi</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; 'pi</code></pre>
+                <pre class="output next"><code class="language-">pi</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de <code class="language-scheme">(quote e)</code></h3>
+
+        <div class="columns two">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; pi</code></pre>
+                <pre class="output next"><code class="language-">3.141592653589793</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; '''pi</code></pre>
+                <pre class="output next"><code class="language-">''pi</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (car (a b c))</code></pre>
+                <pre class="error next"><code class="language-">a: undefined;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (car '(a b c))</code></pre>
+                <pre class="output next"><code class="language-">a</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (cons 'a '(b c)</code></pre>
+                <pre class="output next"><code class="language-">(a b c)</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (car (cons 'a '(b c)))</code></pre>
+                <pre class="output next"><code class="language-">a</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (car '(cons a (b c)))</code></pre>
+                <pre class="output next"><code class="language-">cons</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (car (cons a (b c)))</code></pre>
+                <pre class="error next"><code class="language-">a: undefined;</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>define</code></h3>
+
+        <p>La valeur de <code class="language-scheme">(define s e)</code> n’est pas spécifiée.</p>
+        <p>L’évaluation a pour <em>effet</em> de lier la valeur [[$e$]] au symbole $s$.</p>
+        <p>Une forme spéciale define peut apparaître à l’intérieur d’une autre forme, mais nous n’utilisons pas cette
+            possibilité par la suite ; les formes spéciales <code>define</code> sont normalement évaluées dans l’environnement global et
+            toute nouvelle liaison (par <code>define</code>) d’une valeur à un symbole <code>x</code> rend caduque la liaison antérieure éventuelle à ce
+            symbole.</p>
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>define</code></h3>
+
+        <p class="note">À suivre de haut en bas par colonne.</p>
+
+        <div class="columns three">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="error next"><code class="language-">x: undefined;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (define x (+ 4 1))</code></pre>
+                <pre class="output next"><code class="language-">...</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="output next"><code class="language-">5</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (+ x 3)</code></pre>
+                <pre class="output next"><code class="language-">8</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (define x +)</code></pre>
+                <pre class="output next"><code class="language-">...</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="output next"><code class="language-">#&lt;procedure:+&gt;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; 'x</code></pre>
+                <pre class="output next"><code class="language-">x</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (x 2 3 4)</code></pre>
+                <pre class="output next"><code class="language-">9</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (define 'x 7)</code></pre>
+                <pre class="error next"><code class="language-">[[à éviter]]</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (define x (x 4 4))</code></pre>
+                <pre class="output next"><code class="language-">...</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="output next"><code class="language-">8</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>let</code> - Parallel Binding</h3>
+
+        <p><code class="language-scheme">(let ([id expr] ...) body ...+)</code></p>
+
+        <p>La valeur d'une forme <code class="language-scheme">let</code> n’est pas spécifiée. Nous renvoyons, normalement,
+            l’évaluation du <code>body</code> si cette valeur existe.</p>
+        <p>L’évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
+            indépendente ; les $id$s ne sont pas liés dans les expressions $expr$. Les $id$s peuvent être utilisés
+            dans <code>body</code>.</p>
+
+        <div class="columns three">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (let ((x 1)
+        (y (+ x 1)))
+  (+ x y))</code></pre>
+                <pre class="error next"><code class="language-">x: undefined;</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (define x 42)
+&gt; (let ((x 1)
+        (y (+ x 1)))
+    (+ x y))</code></pre>
+                <pre class="output next"><code class="language-">44</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (define x 42)
+&gt; (let ((x 10))
+    (let ((x 1)
+          (y (+ x 1)))
+      (+ x y)))</code></pre>
+                <pre class="output next"><code class="language-">12</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>let*</code> - Sequential Binding</h3>
+
+        <p><code class="language-scheme">(let* ([id expr] ...) body ...+)</code></p>
+
+        <p>La valeur d'une forme <code class="language-scheme">let*</code> n’est pas spécifiée. Nous renvoyons, normalement,
+            l’évaluation du <code>body</code> si cette valeur existe.</p>
+        <p>L’évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
+            séquentielle ; chaque $id$ peut être utilisé dans les $expr$s antecedants et les $id$s peuvent être utilisés
+            dans <code>body</code>.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (let* ((y x) (x 1)) y)</code></pre>
+        <pre class="error next"><code class="language-">x: undefined;</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (let* ((x 1) (y x)) y)</code></pre>
+        <pre class="output next"><code class="language-">1</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>let*</code> - Sequential Binding</h3>
+
+        Les expressions
+
+        <pre class=""><code class="language-scheme">(let* ((x 1)
+       (y x))
+  y)</code></pre>
+
+        et
+
+        <pre class=""><code class="language-scheme">(let ((x 1))
+  (let ((y x))
+    y))</code></pre>
+
+    sont équivalentes.
+
+    </section>
+
+    <section class="slide">
+        <h3>“Evaluation” de la forme <code>letrec</code> - Recursive Binding</h3>
+
+        <p><code class="language-scheme">(letrec ([id expr] ...) body ...+)</code></p>
+
+        <p>La forme <code>letrec</code> sera traité plus tard.</p>
+
+        <ul>
+            <li><code>let</code> : les $id$s ne sont que disponible dans le <code>body</code>.</li>
+            <li><code>let*</code> : chaque $id$ est disponible dans le <code>body</code> et chaque espression $expr$ antecedante.</li>
+            <li><code>letrec</code> : les $id$s sont disponible dans le <code>body</code> et toutes les expressions $expr$. Les liaisons letrec sont donc récursives.</li>
+        </ul>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
