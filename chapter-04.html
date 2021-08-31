@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 04: La forme lambda</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 04: La forme lambda</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 04: La forme <code>lambda</code></h2>
+        <p>La fonction qui à son unique argument associe le carr é de sa valeur s'écrit parfois $\lambda x . x * x$.
+            (Voir <a href="http://en.wikipedia.org/wiki/Lambda_calculus" target="_blank">Lambda Calculus</a>).</p>
+
+        <p>La variable x n'a qu'un rôle de marque-place et peut être renommée.</p>
+        <p>En Scheme on écrit <code class="language-scheme">(lambda (x) (* x x))</code>.</p>
+        <p>La liste <code>(x)</code> est la liste des paramètres.</p>
+        <p>La liste <code>(* x x)</code> est le corps de la forme lambda.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; pi</code></pre>
+        <pre class="output next"><code class="language-">3.141592653589793</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (lambda (y) (* y y))</code></pre>
+        <pre class="output next"><code class="language-">#&lt;procedure&gt;</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; ((lambda (y) (* y y)) 12)</code></pre>
+        <pre class="output next"><code class="language-">144</code></pre>
+    </section>
+
+    <section class="slide">
+        <h2>Chapitre 04: La forme <code>lambda</code></h2>
+
+        <pre class="input next"><code class="language-scheme">&gt; ((lambda (pi) (* pi pi)) 12)</code></pre>
+        <pre class="output next"><code class="language-">144</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; ((lambda (car) (* car car)) 12)</code></pre>
+        <pre class="output next"><code class="language-">144</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; y</code></pre>
+        <pre class="error next"><code class="language-">y: undefined;</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; pi</code></pre>
+        <pre class="output next"><code class="language-">3.141592653589793</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; car</code></pre>
+        <pre class="output next"><code class="language-">#&lt;procedure:car&gt;</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Règle de calcul</h3>
+        <p>Evaluation de $(e_0 e_1 \ldots e_n)$, $e_0 = (lambda (x_1 \ldots x_n) M)$.</p>
+        <p>On évalue d'abord les expressions $e_i$, ce qui donne les valeurs $v_i$ $(i = 0,1,\ldots,n)$.</p>
+        <p>La valeur $v_0$ est une fonction à $n$ arguments.</p>
+        <p>On applique $v_0$ à la suite des valeurs $(v1,\ldots,vn)$; le résultat est la valeur de la combinaison.</p>
+        <p>Le processus d'application est, par définition, le processus d'évaluation de l'expression $M$ (le corps de la forme
+            <code>lambda</code>), dans laquelle les variables $x_1, \ldots, x_n$ sont liées aux valeurs $v_1, \ldots, v_n$, respectivement.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemples</h3>
+        <p class="note">À suivre de haut en bas par colonne.</p>
+    
+        <div class="columns two">
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="error next"><code class="language-">x: undefined;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (define y 9)</code></pre>
+                <pre class="output next"><code class="language-">...</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; y</code></pre>
+                <pre class="output next"><code class="language-">9</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; ((lambda (x y) (+ 2 x y )) 3 7)</code></pre>
+                <pre class="output next"><code class="language-">12</code></pre>
+            </div>
+            <div>
+                <pre class="input next"><code class="language-scheme">&gt; (+ 2 3 7)</code></pre>
+                <pre class="output next"><code class="language-">12</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; x</code></pre>
+                <pre class="error next"><code class="language-">x: undefined;</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; y</code></pre>
+                <pre class="output next"><code class="language-">9</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; ((lambda (x) (+ 2 x y)) 8)</code></pre>
+                <pre class="output next"><code class="language-">19</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <p>Remarque importante. La liaison des <code>xi</code> aux $v_i$ disparaît dès que le processus d'application se termine.
+            Les liaisons antérieures éventuelles des <code>xi</code> sont alors à nouveau en vigueur. Le caractère temporaire des liaisons
+            des paramètres permet d'éviter les "téléscopages" de noms.</p>
+    
+        <p>Exemple. Dans un environnement où <code>x</code> a une valeur numérique, l'expression</p>
+        <pre class=""><code class="language-scheme">((lambda (x) (* 2 x))
+  ((lambda (x) (- 9 ((lambda (x) (+ 3 x)) x))) x))</code></pre>
+        <p>a la même valeur que l'expression</p>
+        <pre class=""><code class="language-scheme">((lambda (w) (* 2 w))
+  ((lambda (v) (- 9 ((lambda (u) (+ 3 u)) v))) x))</code></pre>
+        <p>(Le fait que <code>u</code>, <code>v</code> et <code>w</code> aient des valeurs ou non dans cet environnement est sans importance.)</p>
+        <p class="note">Un <em>environnement</em> est un ensemble de liaisons variable-valeur.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Portée, réduction et combinaison I</h3>
+        <pre class="next"><code class="language-">          1       2             3                 4       5   6    7
+          |       |             |                 |       |   |    |
+          V       V             V                 V       V   V    V</code></pre>
+
+        <pre class=""><code class="language-scheme">((lambda (x) (* 2 x)) ((lambda (x) (- 9 ((lambda (x) (+ 3 x)) x))) x))</code></pre>
+        <pre class="next"><code class="language-">||                  | |                  └------------------┘    |   |
+|└------------------┘ └------------------------------------------┘   |
+└--------------------------------------------------------------------┘</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Portée, réduction et combinaison II</h3>
+        <pre class="input"><code class="language-scheme">&gt; (define x 5)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <p>Les expressions qui suivent ont toutes pour valeur <code>2</code>.</p>
+
+        <pre class="next"><code class="language-scheme">((lambda (x) (* 2 x)) ((lambda (x) (- 9 ((lambda (x) (+ 3 x)) x))) x))</code></pre>
+        <pre class="next"><code class="language-scheme">((lambda (w) (* 2 w)) ((lambda (v) (- 9 ((lambda (u) (+ 3 u)) v))) x))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Portée, réduction et combinaison III</h3>
+        <pre class="input"><code class="language-scheme">&gt; (define x 5)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <p>Les expressions qui suivent ont toutes pour valeur <code>2</code>.</p>
+
+        <pre class=""><code class="language-scheme">((lambda (w) (* 2 w)) ((lambda (v) (- 9 ((lambda (u) (+ 3 u)) v))) x))</code></pre>
+        <hr />
+        <pre class="next"><code class="language-scheme">(* 2 ((lambda (v) (- 9 ((lambda (u) (+ 3 u)) v))) x))</code></pre>
+        <pre class="next"><code class="language-scheme">(* 2 (- 9 ((lambda (u) (+ 3 u)) x)))</code></pre>
+        <pre class="next"><code class="language-scheme">(* 2 (- 9 (+ 3 x)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Portée, réduction et combinaison III</h3>
+        <pre class="input"><code class="language-scheme">&gt; (define x 5)</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <p>Les expressions qui suivent ont toutes pour valeur <code>2</code>.</p>
+
+        <pre class=""><code class="language-scheme">((lambda (w) (* 2 w)) ((lambda (v) (- 9 ((lambda (u) (+ 3 u)) v))) x))</code></pre>
+        <hr />
+        <pre class="next"><code class="language-scheme">((lambda (w) (* 2 w)) ((lambda (v) (- 9 (+ 3 v))) x))</code></pre>
+        <pre class="next"><code class="language-scheme">((lambda (w) (* 2 w)) (- 9 (+ 3 x)))</code></pre>
+        <pre class="next"><code class="language-scheme">(* 2 (- 9 (+ 3 x)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Occurrences libres, occurrences liées I</h3>
+        <p>Expression mathématique : $E =_{def} 1-\int_{0}^{x}sin(u)du$</p>
+    
+        <p>
+            le symbole $x$ a une valeur (dont dépend celle de $E$) ; le symbole u n'a pas de valeur; Remplacer (partout !) $u$ par
+            $t$ ne change pas la valeur de $E$. Les symboles $1$, $0$, $sin$ et $\int \ldots d \ldots$ ont des valeurs (nombres pour
+            les deux premiers, fonction pour le troisième, opérateur d'intégration pour le dernier).
+        </p>
+        <p>
+            En logique, la valeur de vérité de $\forall x P(x,y)$ dépend de la valeur de la “variable libre” $y$ (et de
+            l'interprétation de la constante $P$) mais pas de la valeur de la “variable liée” $x$ qui peut être renommée :
+            $\forall x P(x,y)$ et $\forall z P(z,y)$ sont des formules logiquement équivalentes.
+        </p>
+        <p>Le même genre de distinction doit se faire en Scheme. Pour évaluer l'expression 
+            <code class="language-scheme">((lambda (x) (+ x y)) 5)</code>, il sera
+            nécessaire que y ait une valeur ; par contre, la valeur éventuelle de <code>x</code> est sans importance. On
+            peut d'ailleurs
+            remplacer les deux occurrences de <code>x</code> par <code>z</code>, par exemple.</p>
+    
+        <p class="note">Est-ce qu'on peut, dans cet exemple, remplacer les deux occurrences de <code>x</code> par
+            <code>y</code> ?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Occurrences libres, occurrences liées II</h3>
+    
+        <p>Les notations Scheme sont sur ce point plus flexibles que les notations mathématiques. </p>
+        
+        <p>On ne peut écrire $\int_0^x sin(x) dx$ au lieu de $\int_0^x sin(u) du$ </p>
+        
+        <p>
+            Mais on peut écrire <br />
+            <code class="language-scheme">((lambda (x) (+ x 5)) x)</code> <br />au lieu de <br />
+            <code class="language-scheme">((lambda (u) (+ u 5)) x)</code>. <br />
+        </p>         
+        
+        <p>Même si la seconde notation est naturellement préférable.</p>
+        <p>L'utilisateur doit se méfier des "téléscopages de noms". </p>
+
+        <p>
+            On observe aussi que la valeur de <br />
+             <code class="language-scheme">((lambda (u) (+ u 5)) (* x 3))</code><br />
+            dépend de celle de <code>x</code> mais que la valeur de<br />
+            <code class="language-scheme">(lambda (x) ((lambda (u) (+ u 5)) (* x 3)))</code><br />
+            n'en dépend pas.
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Occurrences libres, occurrences liées III</h3>
+    
+        <p>Toute occurrence de <code>x</code> dans le corps E de la forme <code class="language-scheme">(lambda (... x ...) E)</code> est dite <em>liée</em>. Par extension, une
+            occurrence de <code>x</code> est liée dans une expression $\alpha$ si cette expression comporte une sous-expression (forme lambda)
+            dans laquelle l'occurrence en question est liée. Une occurrence non liée (en dehors d'une liste de paramètres)
+            est <em>libre</em>.</p>
+        <p>Dans l'expression <code class="language-scheme">((lambda (x) (- 9 ((lambda (x) (+ 3 x)) x))) x)</code>, les deux premières occurrences de <code>x</code> sont des
+            paramètres, les troisième et quatrième occurrences de <code>x</code> sont liées, la cinquième occurrence de <code>x</code> est libre.</p>
+        <p>Dans l'expression <code class="language-scheme">(* 9 ((lambda (x) (+ 3 x)) x) x)</code>, la première occurrence de <code>x</code> est un paramètre, la deuxième
+            occurrence de <code>x</code> est liée, les troisième et quatrième occurrences de <code>x</code> sont libres.</p>
+        <p>Les variables liées sont habituelles en logique, et aussi en mathématique (indice de sommation, variable
+            d'intégration).</p>
+    </section>
+
+    <section class="slide">
+        <h3>Statut “première classe” des procédures</h3>
+    
+        <p>Les procédures, valeurs des formes <code>lambda</code>, héritent de toutes les propriétés essentielles des valeurs
+            usuelles comme les nombres. En particulier, on peut définir une procédure admettant d'autres procédures comme
+            arguments, et renvoyant une procédure comme résultat. De même, on peut lier une procédure à un symbole, en utilisant
+            <code>define</code>.</p>
+
+        <p>Ceci évoque les mathématiques (les domaines de fonctions ont le même “statut” que les domaines de nombres), mais
+            contraste avec les langages de programmation usuels, qui ne permettent généralement pas, par exemple, de renvoyer
+            une procédure comme résultat de l'application d'une autre procédure à ses arguments.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Statut “première classe” des procédures</h3>
+    
+        <pre class="input"><code class="language-scheme">&gt; (define square (lambda (x) (* x x)))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; square</code></pre>
+        <pre class="output"><code class="language-">#&lt;procedure:square&gt;</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (square (+ 4 1))</code></pre>
+        <pre class="output"><code class="language-">25</code></pre>
+    
+        <p>Evaluer <code>square</code> et <code class="language-scheme">(+ 4 1)</code>, ce qui donne les valeurs $v0$ et $v1$. Appliquer
+            la
+            valeur $v0$ (fonction unaire) à la valeur $v1 = 5$ <br />
+            i.e. évaluer <code class="language-scheme">(* x x)</code> où <code>x</code> est lié à (remplacé par)
+            <code>5</code><br />
+            i.e. évaluer <code class="language-scheme">(* 5 5)</code>.</p>
+        <p>Remarque. <em>Conceptuellement</em>, la valeur-procédure $v0$ associée à la variable square pourrait être la
+            table (infinie) des
+            couples $(n,n2)$. Un tel objet n'est pas affichable, et Scheme affichera simplement
+            <code>#&lt;procedure:square&gt;</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Statut “première classe” des procédures</h3>
+    
+        <pre class="input next"><code class="language-scheme">&gt; (define plus-n
+    (lambda (n)
+      (lambda (x)
+        (+ n x))))</code></pre>
+        <pre class="output next"><code class="language-">...</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (define plus-2 (plus-n 2))</code></pre>
+        <pre class="output next"><code class="language-">...</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (plus-2 5)</code></pre>
+        <pre class="output next"><code class="language-">7</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arguments et valeurs fonctionnels I</h3>
+    
+        <pre class="input next"><code class="language-scheme">&gt; (define compose
+    (lambda (f g)
+      (lambda (x) (f (g x)))))</code></pre>
+        <pre class="output next"><code class="language-">...</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (compose car cdr)</code></pre>
+        <pre class="output next"><code class="language-">#&lt;procedure&gt;</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; ((compose car cdr) '(1 2 3 4))</code></pre>
+        <pre class="output next"><code class="language-">2</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (cadr '(1 2 3 4))</code></pre>
+        <pre class="output next"><code class="language-">2</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arguments et valeurs fonctionnels II</h3>
+    
+        <pre class="input next"><code class="language-scheme">&gt; ((compose (compose car cdr) cdr) '(1 2 3 4))</code></pre>
+        <pre class="output next"><code class="language-">3</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; ((compose (compose car cdr) (compose cdr cdr)) '(1 2 3 4))</code></pre>
+        <pre class="output next"><code class="language-">4</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arguments et valeurs fonctionnels III</h3>
+    
+        <p>
+            Etant donné une fonction <code>f</code> et un incrément <code>dx</code>,
+            une approximation de la fonction dérivée en <code>x</code> est (la valeur de)
+            <code class="language-scheme">(/ (- (f (+ x dx)) (f x)) dx)</code>. 
+            On peut définir la fonction <code>deriv-p</code> (dérivée en un point) comme suit :
+        </p>
+        <pre class=""><code class="language-scheme">(define deriv-p
+  (lambda (f x dx) (/ (- (f (+ x dx)) (f x)) dx)))</code></pre>
+
+        <p class="next">On a</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (deriv-p square 10 0.00001)</code></pre>
+        <pre class="output next"><code class="language-">20.00000999942131</code></pre>
+
+    </section>
+
+    <section class="slide">
+        <h3>Arguments et valeurs fonctionnels IV</h3>
+    
+        
+        <p>Il est plus élégant de définir d'emblée l'<em>opérateur</em> <code>deriv</code> :</p>
+        <pre class=""><code class="language-scheme">(define deriv
+  (lambda (f dx)
+    (lambda (x) (/ (- (f (+ x dx)) (f x)) dx))))</code></pre>
+        
+        <p class="next">On a alors</p>
+        <pre class="input next"><code class="language-scheme">&gt; ((deriv square 0.00001) 10)</code></pre>
+        <pre class="output next"><code class="language-">20.00000999942131</code></pre>
+
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
