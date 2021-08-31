@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 05: Récursivité</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px; 
+            color: red;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 05: Récursivité</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 05: Récursivité</h2>
+    
+        <p>La notion de fonction est cruciale en programmation parce qu'elle permet de résoudre élégamment de gros problèmes
+            en les ramenant à des problèmes plus simples.</p>
+        <p>De même, la notion de fonction est cruciale en mathématique parce qu'elle permet de construire et de nommer des
+            objets complexes en combinant des objets plus simples.</p>
+        <p>La définition $hypo =_{def} \lambda x,y : \sqrt{x^2 + y^2}$ de même que le programme</p>
+
+        <pre class=""><code class="language-scheme">(define hypo
+  (lambda (x y) (sqrt (+ (square x) (square y)))))</code></pre>
+
+        <p>sont des exemples classiques de fonctions. La définition (opérationnelle) de la longueur de l'hypoténuse suppose
+            les définitions préalables de l'addition, de l'élévation au carré et de l'extraction de la racine carrée.</p>
+        <p>Remarque. L'ordre dans lequel on <em>définit</em> les procédures n'a pas d'importance. On peut définir <strong>(mais non utiliser)</strong>
+            <code>hypo</code> avant de définir <code>square</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Idée de base I</h3>
+
+        <p>L'idée de la récursivité est d'utiliser, dans la définition d'un objet relativement complexe, non seulement des
+            objets antérieurement définis, mais aussi l'objet à définir lui-même.</p>
+
+        <p>Le risque de "cercle vicieux" existe, mais n'est pas inévitable. On peut faire une analogie avec les égalités et les
+            équations :</p>
+            
+        <ul>
+            <li>Dans un contexte où $f$, $a$ et $b$ sont définis, on peut définir $x$ par l'égalité $x = f(a,b)$</li>
+            <li>Par contre, l'égalité $x = f(a,x)$ ne définit pas nécessairement un et un seul objet $x$ ; même si c'est le cas, le
+                procédé de calcul de $x$ peut ne pas exister.</li>
+        </ul>
+            
+        <p>Un procédé de calcul parfois utilisé pour résoudre l'équation $x = f (a, x)$ consiste à construire un préfixe plus ou
+            moins long de la suite</p>
+        $$x_0, x_1 = f(a,x_0), x2 = f(a,x_1), ... , x_{n+1} = f(a,x_n),...$$
+        <p>et à considérer que le dernier terme calculé est (proche de) la solution cherchée. Ce procédé fournit rapidement, par
+            exemple, une bonne approximation de la solution de l'équation $x = cos x$.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Idée de base II</h3>
+    
+        <p>Le procédé d'approximation peut aussi être utilisé pour calculer des fonctions plutôt que des nombres, et donc
+            pour résoudre des équations fonctionnelles du type</p>
+    
+        $$f = \phi(g,f)$$
+
+        <p>L'équation différentielle $y_0 = f (x, y)$ (avec $y(x_0) = y_0$) peut s'écrire</p>
+        $$y(x) = y_0 + \int_{x_0}^x f(t,y(t))dt$$
+        <p>ce qui permet souvent une résolution approchée. </p>
+    
+        <p>Exercice. Résoudre l'équation $y_0 = y$, avec $y(0) = 1$.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Idée de base III</h3>
+        
+        <p>En programmation, on doit à toute construction associer un procédé de calcul clair, précis et raisonnablement
+            efficace. Pour cette raison, la définition récursive de fonctions sera limitée à des instances particulières
+            duschéma $f=\phi(g,f)$.</p>
+        
+        <p>En pratique, on constatera que l'évaluation de $f(x)$ nécessitera la détermination préalable d'un ensemble de valeurs
+            $f(y_1),...,f(y_n)$ où les $y_1,...,y_n$ sont, en un certain sens, "plus simples" que $x$.</p>
+        
+        <p>Si le domaine de la fonction $f$ à définir est tel que tout élément n'admet qu'un ensemble fini d'éléments "plus
+            simples", on conçoit que le risque de "tourner en rond" pourra être évité.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Deux exemples classiques I</h3>
+    
+        <p>Définition de la factorielle (fonction de $\mathbb{N}$ dans $\mathbb{N}$) :</p>
+
+        $$n! = \text{[if $n = 0$ then $1$ else $n * (n-1)!$]}$$
+        
+        <p>Exemple d'exploitation de la définition :</p>
+        
+        $$3! = 3 * 2! = 3 * 2 * 1! = 3 * 2 * 1 * 0! = 3 * 2 * 1 * 1 = 6$$
+    </section>
+
+    <section class="slide">
+        <h3>Deux exemples classiques II</h3>
+    
+        <p>Définition de la suite de Fibonacci :</p>
+    
+        $$f_n = \text{[if $n \lt 2$ then $n$ else $f_{n-1}+f_{n-2}$]}$$
+    
+        <sub>$$f_0 = 0,$$
+            $$f_1 = 1,$$
+            $$f_2 = 1 + 0 = 1,$$
+            $$f_3 = 1 + 1 = 2,$$
+            $$f_4 = 2 + 1 = 3,$$
+            $$f_5 = 3 + 2 = 5,$$
+            $$f_6 = 5 + 3 = 8,$$
+            $$...$$</sub>
+    
+        <p>Dans les deux cas, "plus simple" s'identifie à "plus petit".</p>
+        <p>Chaque entier <em>naturel</em> n'admettant qu'un nombre fini de naturels plus petits, 
+            on conçoit que ces définitions
+            <em>récursives</em> de fonctions soient "acceptables" (le calcul se termine).</p>
+    </section>
+
+    <section class="slide">
+        <h3>Deux exemples classiques III</h3>
+    
+        <p>Tout ceci se traduit aisément en <code>Scheme</code> :</p>
+    
+        <pre class="input"><code class="language-scheme">&gt; (define fact (lambda (n) (if (zero? n) 1 (* n (fact (- n 1))))))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (fact 0)</code></pre>
+        <pre class="output next"><code class="language-">0</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact 4)</code></pre>
+        <pre class="output next"><code class="language-">24</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact (fact 4))</code></pre>
+        <pre class="output next"><code class="language-">620448401733239439360000</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact -1)</code></pre>
+        <pre class="error next"><code class="language-">[[ Aborting: out of memory ]]</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Deux exemples classiques IV</h3>
+        
+        <pre class="input"><code class="language-scheme">&gt; (define fib
+    (lambda (n)
+      (if (&lt; n 2) n (+ (fib (- n 1)) (fib (- n 2))))))</code></pre>
+        <pre class="output"><code class="language-">...</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (fib 0)</code></pre>
+        <pre class="output next"><code class="language-">0</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fib 6)</code></pre>
+        <pre class="output next"><code class="language-">8</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fib 12)</code></pre>
+        <pre class="output next"><code class="language-">144</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Double rôle de <code>define</code></h3>
+    
+        <p>La forme <code class="language-scheme">(define var exp)</code> peut être évaluée dans deux cadres distincts.</p>
+        <ul>
+            <li>L'expression <code>exp</code> ne comporte pas d'occurrence libre de <code>var</code>. Dans ce cas non récursif, <code>exp</code> a une valeur
+                v au moment où la forme <code>define</code> est évaluée, et le seul rôle de cette évaluation est de provoquer la liaison de v à
+                var.</li>
+            <li>L'expression <code>exp</code> est une forme lambda, pouvant comporter des occurrences libres de <code>var</code>. Dans ce cas,
+                <code>exp</code> n'a pas de valeur (du moins, pas de valeur utile) avant l'évaluation de la forme <code>define</code>. Cette évaluation a
+                alors le double rôle de définir une procédure récursive et de la lier à (de lui donner le nom) <code>var</code>.</li>
+        </ul>
+        
+        <p>Avant l'évaluation de la forme spéciale</p>
+        
+        <pre><code class="language-scheme">(define fact (lambda (n) (if (zero? n) 1 (* n (fact (- n 1))))))</code></pre>
+        
+        <p>la forme <code class="language-scheme">(lambda (n) (if (zero? n) 1 (* n (fact (- n 1)))))</code> n'a pas de valeur
+            utile puisque <code>fact</code> n'a pas de valeur. Après l'évaluation, la procédure de calcul de la factorielle est liée à (est
+            la valeur de) la variable <code>fact</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Processus de calcul I</h3>
+
+        <div class="columns two">
+            <div>
+                <p>Simulation d'un calcul récursif :</p>
+
+                <sub><pre class="output"><code class="language-scheme">(fact 3)
+(if (zero? 3) 1 (* 3 (fact (- 3 1))))
+(* 3 (fact (- 3 1)))
+(* 3 (fact 2))
+...
+(* 3 (* 2 (fact 1)))
+...
+(* 3 (* 2 (* 1 (fact 0))))
+...
+(* 3 (* 2 (* 1 1)))
+...
+6</code></pre></sub>
+            </div>
+            <div>
+                <p>On conçoit que ce type de calcul requiert un espace-mémoire dont la taille dépend (ici, linéairement) de la
+                    valeur de l'argument.</p>
+                <p>On note aussi que l'introduction de la récursivité ne semble pas exiger de mécanisme particulier pour appliquer
+                    une fonction à des arguments : les règles déjà introduites suffisent. Cet avantage peut entraîner des déboires
+                    pour l'utilisateur peu soucieux du processus de calcul.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Processus de calcul II</h3>
+
+        <p>Scheme accepte les définitions</p>
+        
+        <pre class=""><code class="language-scheme">(define f (lambda (x) (f x)))</code></pre>
+        <pre class=""><code class="language-scheme">(define g (lambda (x) (g (+ x 1))))</code></pre>
+        <pre class=""><code class="language-scheme">(define h (lambda (x) (+ (h x) 1)))</code></pre>
+        
+        <p>Evaluer <code class="language-scheme">(f 0)</code>,<code class="language-scheme">(g 1</code>) ou<code
+                class="language-scheme">(h 2)</code> ne donne rien ... sauf un gaspillage de ressources !</p>
+        
+        <p>Même chose pour <code class="language-scheme">(fact -1)</code> : procédure utile, mais argument inapproprié.</p>
+        <p>L'utilisateur peut éviter ce risque en vérifiant que tout appel pour des valeurs données donne lieu à un nombre fini
+            d'appels subséquents, pour des valeurs "plus simples". Des schémas de programmes récursifs existent, qui
+            garantissent la propriété de terminaison.</p>
+
+        <p>Exercice. Que penser, dans le domaine des réels positifs, de la définition suivante : $f(0) = a, f(x) = g(b,f(x/2))$ si $x \gt 0$?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Processus de calcul III</h3>
+
+        <p>La terminaison du calcul de <code class="language-scheme">(fib n)</code> (<code>n</code> $\in \mathbb{N}$) : se démontre par récurrence.</p>
+        <p>L'efficacité du calcul est inacceptable :</p>
+        
+        <p><code class="language-scheme">(fib 9)</code><br />
+        <code class="language-scheme">(+ (fib 8) (fib 7))</code><br />
+        <code class="language-scheme">(+ (+ (fib 7) (fib 6)) (fib 7))</code><br />
+        <code class="language-scheme">...</code></p>
+        
+        <p>
+            L'expression <code class="language-scheme">(fib 7)</code> sera évaluée deux fois. En fait, 
+            1 évaluation de <code class="language-scheme">(fib 9)</code> implique<br />
+            1 évaluation de <code class="language-scheme">(fib 8)</code>,
+            2 évaluations de <code class="language-scheme">(fib 7)</code>,
+            3 évaluations de <code class="language-scheme">(fib 6)</code>,
+            5 évaluations de <code class="language-scheme">(fib 5)</code>, etc.
+        </p>
+
+        <p>Temps de calcul : proportionnel à la valeur calculée $f_n \simeq 1.6^n$.</p>
+        <p>Deux remèdes possibles seront vus plus loin :</p>
+        <ol>
+            <li>Utiliser un autre principe de calcul (moins naïf);</li>
+            <li>Forcer l'interpréteur à réutiliser les résultats intermédiaires.</li>
+        </ol>
+    </section>
+
+    <section class="slide">
+        <h3>Processus de calcul IV</h3>
+
+        <p>On sait que les nombres de Fibonacci peuvent se calculer plus efficacement, au moyen d'une simple boucle. L'algorithme
+            correspondant se traduit immédiatement en scheme :</p>
+        
+        <div class="columns two">
+            <pre class=""><code class="language-scheme">(define fib-a
+  (lambda (n a b)
+    (if (zero? n)
+      a
+      (fib-a (- n 1) b (+ a b)))))</code></pre>
+            <pre class=""><code class="language-scheme">(define fib
+  (lambda (n)
+    (fib-a n 0 1)))</code></pre>
+        </div>
+        
+        <p class="specification">Si <code>n</code>, <code>a</code> et <code>b</code> ont pour valeurs respectives $n$, $f_i$ et
+            $f_{i+1}$, alors <code>(fib-a n a b)</code> a pour valeur $f_{n+i}$. 
+            En particulier, <code>(fib-a n 0 1)</code> a pour valeur $f_n$.</p>
+    
+        <p>Signalons déjà que ce type de récursivité "dégénérée" se reconnaît par une simple analyse de la syntaxe du programme.
+            Cette analyse permet à l'interpréteur d'exécuter le programme aussi efficacement qu'une simple boucle en C, sans
+            consommation inutile de mémoire.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité croisée</h3>
+
+        <p>Exemple classique.</p>
+        
+        <pre class=""><code class="language-scheme">(define even?
+  (lambda (n) (if (zero? n) #t (odd? (- n 1)))))</code></pre>
+        <pre class=""><code class="language-scheme">(define odd?
+  (lambda (n) (if (zero? n) #f (even? (- n 1)))))</code></pre>
+    
+        <p>Processus de calcul.</p>
+
+        <pre class=""><code>(odd? 4) -&gt; (even? 3) -&gt; (odd? 2) -&gt; (even? 1) -&gt; (odd? 0) -&gt; #f</code></pre>
+
+        <p>Rappel. L'ordre dans lequel on définit les procédures n'a pas d'importance. Seule exigence (naturelle) : les
+            procédures doivent être définies avant d'être utilisées (appliquées à des arguments). Le double rôle de define
+            existe dès qu'il y a récursivité, croisée ou non.</p>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
