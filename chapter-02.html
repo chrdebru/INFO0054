@@ -65,7 +65,7 @@
         <p>Interpréteur : boucle <strong>Read</strong>-<strong>Eval</strong>-<strong>Print</strong>.</p>
         <p>L'interpréteur <strong>lit</strong> une expression $e$, l'<strong>évalue</strong> et <strong>imprime</strong>
             sa valeur $[[e]]$ (ou un message spécifique).</p>
-        <p>Il peut aussi <strong>lire</strong> une “définition” et l'enregistrer.</p>
+        <p>Il peut aussi <strong>lire</strong> une "définition" et l'enregistrer.</p>
 
         <br /><br /><br />
         <p class="note"><sub>Au lieu de <code>print</code>, j'utilise dans mes exemples la function <code>write</code>
@@ -94,8 +94,8 @@
             <li>
                 <p>
                     Une expression composée, ou <em>combinaison</em>, comporte un opérateur et des arguments ; les
-                    composants sont eux-mêmes des expressions, simples ou composées. Une combinaison commence par “(” et
-                    finit par “)”.
+                    composants sont eux-mêmes des expressions, simples ou composées. Une combinaison commence par "(" et
+                    finit par ")".
                 </p>
                 <pre class="input"><code class="language-scheme">&gt; (+ 2 5)</code></pre>
                 <pre class="output"><code class="language-">7</code></pre>
@@ -182,7 +182,7 @@
             classiques sont
             naturellement prédéfinis.</p>
         <p class="note">Les messages peuvent varier d'un évaluateur à l'autre, et être plus ou moins
-            informatifs. Un “message d'erreur” peut ne pas comporter le mot <code>error</code>.</p>
+            informatifs. Un "message d'erreur" peut ne pas comporter le mot <code>error</code>.</p>
     </section>
 
     <section class="slide">
@@ -221,7 +221,7 @@
 
     <section class="slide">
         <h3><code>define</code> = liaison à une valeur</h3>
-        <p>Si le symbole <code>pi</code> reçoit une nouvelle valeur (il est “redéfini”), cela n'influera pas sur
+        <p>Si le symbole <code>pi</code> reçoit une nouvelle valeur (il est "redéfini"), cela n'influera pas sur
             <code>invpi</code>. En effet, un <code>define</code> lie son premier argument (un symbole) à la valeur
             de son
             second argument, telle qu'elle existe au moment où l'expression <code>define</code> est évaluée.
@@ -235,7 +235,7 @@
 
     <section class="slide">
         <h3>Symboles</h3>
-        <p>Les symboles sont des “mots” qui ne sont pas des nombres. Ils ne peuvent contenir les caractères spéciaux
+        <p>Les symboles sont des "mots" qui ne sont pas des nombres. Ils ne peuvent contenir les caractères spéciaux
             suivants :</p>
         <p><code>( ) [ ] { } ; , " ' ` # /</code></p>
         <p>Un symbole est généralement utilisé comme variable ; sa valeur est alors l'objet qui lui est lié (s'il

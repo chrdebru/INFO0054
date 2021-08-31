@@ -208,8 +208,8 @@
             les deux premiers, fonction pour le troisième, opérateur d'intégration pour le dernier).
         </p>
         <p>
-            En logique, la valeur de vérité de $\forall x P(x,y)$ dépend de la valeur de la “variable libre” $y$ (et de
-            l'interprétation de la constante $P$) mais pas de la valeur de la “variable liée” $x$ qui peut être renommée :
+            En logique, la valeur de vérité de $\forall x P(x,y)$ dépend de la valeur de la “variable libre" $y$ (et de
+            l'interprétation de la constante $P$) mais pas de la valeur de la “variable liée" $x$ qui peut être renommée :
             $\forall x P(x,y)$ et $\forall z P(z,y)$ sont des formules logiquement équivalentes.
         </p>
         <p>Le même genre de distinction doit se faire en Scheme. Pour évaluer l'expression 
@@ -263,20 +263,20 @@
     </section>
 
     <section class="slide">
-        <h3>Statut “première classe” des procédures</h3>
+        <h3>Statut “première classe" des procédures</h3>
     
         <p>Les procédures, valeurs des formes <code>lambda</code>, héritent de toutes les propriétés essentielles des valeurs
             usuelles comme les nombres. En particulier, on peut définir une procédure admettant d'autres procédures comme
             arguments, et renvoyant une procédure comme résultat. De même, on peut lier une procédure à un symbole, en utilisant
             <code>define</code>.</p>
 
-        <p>Ceci évoque les mathématiques (les domaines de fonctions ont le même “statut” que les domaines de nombres), mais
+        <p>Ceci évoque les mathématiques (les domaines de fonctions ont le même “statut" que les domaines de nombres), mais
             contraste avec les langages de programmation usuels, qui ne permettent généralement pas, par exemple, de renvoyer
             une procédure comme résultat de l'application d'une autre procédure à ses arguments.</p>
     </section>
 
     <section class="slide">
-        <h3>Statut “première classe” des procédures</h3>
+        <h3>Statut “première classe" des procédures</h3>
     
         <pre class="input"><code class="language-scheme">&gt; (define square (lambda (x) (* x x)))</code></pre>
         <pre class="output"><code class="language-">...</code></pre>
@@ -298,7 +298,7 @@
     </section>
 
     <section class="slide">
-        <h3>Statut “première classe” des procédures</h3>
+        <h3>Statut “première classe" des procédures</h3>
     
         <pre class="input next"><code class="language-scheme">&gt; (define plus-n
     (lambda (n)
@@ -351,7 +351,6 @@
 
         <pre class="input next"><code class="language-scheme">&gt; (deriv-p square 10 0.00001)</code></pre>
         <pre class="output next"><code class="language-">20.00000999942131</code></pre>
-
     </section>
 
     <section class="slide">
@@ -366,7 +365,6 @@
         <p class="next">On a alors</p>
         <pre class="input next"><code class="language-scheme">&gt; ((deriv square 0.00001) 10)</code></pre>
         <pre class="output next"><code class="language-">20.00000999942131</code></pre>
-
     </section>
 
     <div class="progress"></div>
