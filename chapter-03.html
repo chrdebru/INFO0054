@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <head>
-    <title>Programmation Fonctionnelle. Chapitre 03: Règles d’évaluation</title>
+    <title>Programmation Fonctionnelle. Chapitre 03: Règles d'évaluation</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
@@ -57,18 +57,18 @@
 <body class="shower list">
 
     <header class="caption">
-        <h1>Chapitre 03: Règles d’évaluation</h1>
+        <h1>Chapitre 03: Règles d'évaluation</h1>
         <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
     </header>
 
     <section class="slide">
-        <h2>Chapitre 03: Règles d’évaluation</h2>
+        <h2>Chapitre 03: Règles d'évaluation</h2>
 
-        <p>La règle d’évaluation des expressions est récursive : <br />l’évaluation d’une expression peut requérir
-            l’évaluation de sous-expressions.</p>
-        <p>Le processus d’évaluation renvoie <em>en général</em> une valeur ; <br />il peut aussi avoir <em>un
+        <p>La règle d'évaluation des expressions est récursive : <br />l'évaluation d'une expression peut requérir
+            l'évaluation de sous-expressions.</p>
+        <p>Le processus d'évaluation renvoie <em>en général</em> une valeur ; <br />il peut aussi avoir <em>un
                 effet</em> (outre
-            l’affichage de
+            l'affichage de
             la valeur).</p>
         <p>Les nombres et les variables sont des cas de base.<br />
             Les combinaisons sont des cas inductifs.<br />
@@ -79,9 +79,9 @@
         <h3>Cas de base</h3>
 
         <ul>
-            <li>L’évaluation d’un nombre donne ce nombre.</li>
-            <li>L’évaluation d’un booléen donne ce booléen.</li>
-            <li>L’évaluation d’un symbole donne la valeur liée à ce symbole, si cette valeur existe et est affichable.
+            <li>L'évaluation d'un nombre donne ce nombre.</li>
+            <li>L'évaluation d'un booléen donne ce booléen.</li>
+            <li>L'évaluation d'un symbole donne la valeur liée à ce symbole, si cette valeur existe et est affichable.
             </li>
         </ul>
 
@@ -113,7 +113,7 @@
     <section class="slide">
         <h3>Cas inductif</h3>
 
-        <p>L’expression à évaluer est une liste $(e_0 \ \ldots \ e_n)$.</p>
+        <p>L'expression à évaluer est une liste $(e_0 \ \ldots \ e_n)$.</p>
 
         <h3>La combinaison</h3>
         <ol>
@@ -126,19 +126,19 @@
         </ol>
 
         <p>Une fonction (mathématique) est un ensemble de couples de valeurs ; la première est un élément du domaine, la
-            seconde l’image correspondante.</p>
-        <p>Appliquer une fonction est produire l’image associée à un élément donné du domaine de la fonction.</p>
-        <p>Pour les fonctions prédéfinies (liées à <code>+</code>, <code>cons</code>, etc. dans l’environnement global)
-            le processus d’application
-            est l’exécution du code correspondant à la fonction. Le cas des fonctions définies par l’utilisateur est
+            seconde l'image correspondante.</p>
+        <p>Appliquer une fonction est produire l'image associée à un élément donné du domaine de la fonction.</p>
+        <p>Pour les fonctions prédéfinies (liées à <code>+</code>, <code>cons</code>, etc. dans l'environnement global)
+            le processus d'application
+            est l'exécution du code correspondant à la fonction. Le cas des fonctions définies par l'utilisateur est
             envisagé plus loin.</p>
     </section>
 
     <section class="slide">
         <h3>Les formes spéciales</h3>
 
-        <p>La syntaxe est celle d’une combinaison, mais chaque forme spéciale a sa propre règle d’évaluation. Les
-            formes spéciales sont identifiées par un mot-clef, qui est le premierélément de l’expression à
+        <p>La syntaxe est celle d'une combinaison, mais chaque forme spéciale a sa propre règle d'évaluation. Les
+            formes spéciales sont identifiées par un mot-clef, qui est le premierélément de l'expression à
             évaluer.</p>
 
 
@@ -149,7 +149,7 @@
         </p>
 
         <p class="note">Remarques. Les valeurs des sous-expressions ne sont pas affichées.</p>
-        <p>En cas d’erreur, l’évaluation est interrompue et un message est affiché.</p>
+        <p>En cas d'erreur, l'évaluation est interrompue et un message est affiché.</p>
     </section>
 
     <section class="slide">
@@ -195,13 +195,13 @@ given: 5</code></pre>
 
     <section class="slide">
         <h3>Evaluation de <code class="language-scheme">(cond (c1 e1) ... (cn en))</code></h3>
-        <p>Les prédicats $c1, \ldots , cn$ sont évalués en séquence, jusqu’au premier $ck$ dont la valeur n’est pas
+        <p>Les prédicats $c1, \ldots , cn$ sont évalués en séquence, jusqu'au premier $ck$ dont la valeur n'est pas
             <code>#f</code> (ce sera le plus souvent <code>#t</code>). La valeur du conditionnel est alors celle de
-            l’expression correspondante $ek$.
+            l'expression correspondante $ek$.
         </p>
 
-        <p>Si tous les prédicats sont évalués à <code>#f</code>, le conditionnel n’a pas de valeur. (C’est généralement
-            lié à une erreur de programmation, même si l’évaluateur n’affiche pas <code>error</code>.) Le dernier
+        <p>Si tous les prédicats sont évalués à <code>#f</code>, le conditionnel n'a pas de valeur. (C'est généralement
+            lié à une erreur de programmation, même si l'évaluateur n'affiche pas <code>error</code>.) Le dernier
             prédicat $cn$ peut être le mot-clef else dont la valeur, dans ce contexte, est <code>#t</code>.</p>
 
         <p><code class="language-scheme">(if e0 e1 e2)</code> abrège <code class="language-scheme">(cond (e0 e1) (else e2))</code>.</p>
@@ -216,8 +216,8 @@ given: 5</code></pre>
     <section class="slide">
         <h3>Evaluation de <code class="language-scheme">(and e1 ... en)</code></h3>
 
-        <p>Les $ei$ sont évalués dans l’ordre et la première valeur fausse est retournée ; les valeurs suivantes ne sont pas
-            calculées. S’il n’y a pas de valeurs fausses, la dernière valeur calculée est retournée. S’il n’y a pas de
+        <p>Les $ei$ sont évalués dans l'ordre et la première valeur fausse est retournée ; les valeurs suivantes ne sont pas
+            calculées. S'il n'y a pas de valeurs fausses, la dernière valeur calculée est retournée. S'il n'y a pas de
             valeurs du tout, <code>#t</code> est retourné.</p>
 
         <pre class="input next"><code class="language-scheme">&gt; (and (= 2 2) (&lt; 2 1) (/ 2 0) (+ 2 3))</code></pre>
@@ -249,8 +249,8 @@ given: 5</code></pre>
     <section class="slide">
         <h3>Evaluation de <code class="language-scheme">(or e1 ... en)</code></h3>
 
-        <p>Les $ei$ sont évalués dans l’ordre et la première valeur non fausse est retournée ; les valeurs suivantes ne sont
-            pas calculées. S’il n’y a pas de valeurs non fausses, ou pas de valeurs du tout, <code>#f</code> est retourné.</p>
+        <p>Les $ei$ sont évalués dans l'ordre et la première valeur non fausse est retournée ; les valeurs suivantes ne sont
+            pas calculées. S'il n'y a pas de valeurs non fausses, ou pas de valeurs du tout, <code>#f</code> est retourné.</p>
 
         <pre class="input next"><code class="language-scheme">&gt; (or (&lt; 2 1) (= 2 2) (/ 2 0) (+ 2 3))</code></pre>
         <pre class="output next"><code class="language-">#t</code></pre>
@@ -282,7 +282,7 @@ given: 5</code></pre>
         <h3>Evaluation de <code class="language-scheme">(quote e)</code></h3>
 
         <p>La valeur est simplement $e$, à ne pas confondre avec la valeur de $e$ ! </p>
-        <p>La forme spéciale <code>(quote e)</code> s’abrège en <code>'e</code>.</p>
+        <p>La forme spéciale <code>(quote e)</code> s'abrège en <code>'e</code>.</p>
 
         <div class="columns two">
             <div>
@@ -338,11 +338,11 @@ given: 5</code></pre>
     <section class="slide">
         <h3>“Evaluation” de la forme <code>define</code></h3>
 
-        <p>La valeur de <code class="language-scheme">(define s e)</code> n’est pas spécifiée.</p>
-        <p>L’évaluation a pour <em>effet</em> de lier la valeur [[$e$]] au symbole $s$.</p>
-        <p>Une forme spéciale define peut apparaître à l’intérieur d’une autre forme, mais nous n’utilisons pas cette
-            possibilité par la suite ; les formes spéciales <code>define</code> sont normalement évaluées dans l’environnement global et
-            toute nouvelle liaison (par <code>define</code>) d’une valeur à un symbole <code>x</code> rend caduque la liaison antérieure éventuelle à ce
+        <p>La valeur de <code class="language-scheme">(define s e)</code> n'est pas spécifiée.</p>
+        <p>L'évaluation a pour <em>effet</em> de lier la valeur [[$e$]] au symbole $s$.</p>
+        <p>Une forme spéciale define peut apparaître à l'intérieur d'une autre forme, mais nous n'utilisons pas cette
+            possibilité par la suite ; les formes spéciales <code>define</code> sont normalement évaluées dans l'environnement global et
+            toute nouvelle liaison (par <code>define</code>) d'une valeur à un symbole <code>x</code> rend caduque la liaison antérieure éventuelle à ce
             symbole.</p>
     </section>
 
@@ -388,9 +388,9 @@ given: 5</code></pre>
 
         <p><code class="language-scheme">(let ([id expr] ...) body ...+)</code></p>
 
-        <p>La valeur d'une forme <code class="language-scheme">let</code> n’est pas spécifiée. Nous renvoyons, normalement,
-            l’évaluation du <code>body</code> si cette valeur existe.</p>
-        <p>L’évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
+        <p>La valeur d'une forme <code class="language-scheme">let</code> n'est pas spécifiée. Nous renvoyons, normalement,
+            l'évaluation du <code>body</code> (le corps de la forme) si cette valeur existe.</p>
+        <p>L'évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
             indépendente ; les $id$s ne sont pas liés dans les expressions $expr$. Les $id$s peuvent être utilisés
             dans <code>body</code>.</p>
 
@@ -424,9 +424,9 @@ given: 5</code></pre>
 
         <p><code class="language-scheme">(let* ([id expr] ...) body ...+)</code></p>
 
-        <p>La valeur d'une forme <code class="language-scheme">let*</code> n’est pas spécifiée. Nous renvoyons, normalement,
-            l’évaluation du <code>body</code> si cette valeur existe.</p>
-        <p>L’évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
+        <p>La valeur d'une forme <code class="language-scheme">let*</code> n'est pas spécifiée. Nous renvoyons, normalement,
+            l'évaluation du <code>body</code> si cette valeur existe.</p>
+        <p>L'évaluation a pour <em>effet</em> de lier la valeur de chaque [[$expr$]] au symbole $id$ d'une manière locale et
             séquentielle ; chaque $id$ peut être utilisé dans les $expr$s antecedants et les $id$s peuvent être utilisés
             dans <code>body</code>.</p>
 
