@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 06: Récursivité structurelle</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px; 
+            color: red;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 06: Récursivité structurelle</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 06: Récursivité structurelle</h2>
+        <h3>Principe de la récursivité structurelle</h3>
+    
+        <p>Le système “accepte” toute définition récursive syntaxiquement correcte, même si la procédure associée donne lieu
+            à des calculs infinis. L'utilisateur doit savoir si, dans un domaine donné, le calcul se terminera toujours.
+            Pour les domaines usuels, des schémas existent qui garantissent la terminaison.</p>
+        <p>Cas particulier : les schémas <em>structurels</em>, basés sur la manière dont les objets du domaine de calcul sont
+            construits.</p>
+        <p>Le processus d'évaluation réduit le calcul de $f(v)$ au calcul de $f(v_1),\ldots,f(v_n)$ où les $v_i$ sont des composants
+            (immédiats) de $v$. Cette technique est sûre tant que l'on se limite aux domaines dont les objets ont un nombre
+            fini de <em>composants (immédiats ou non)</em>, clairement identifiés.</p>
+    </section>
+
+    <section class="slide">
+        <h2>Chapitre 06: Récursivité structurelle</h2>
+        <h3>Principe de la récursivité structurelle</h3>
+
+        <p>Domaines usuels de base :</p>
+        <ul>
+            <li>Nombres naturels</li>
+            <li>Listes</li>
+            <li>Expressions symboliques</li>
+        </ul>
+        <p>En plus : domaines dérivés des précédents, surtout par produit cartésien.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels I</h3>
+    
+        <div class="columns two">
+            <div>
+                <p>Conceptuellement, les naturels sont construits à partir de $0$ et de la fonction successeur $succ$. 
+                    $0$ n'a pas de composant (objet de base) ; $16$ est le seul composant immédiat de $17 = succ(16)$.</p>
+                <p>Schéma de base : </p>
+                <pre class=""><code class="language-scheme">(define F
+  (lambda (n u)
+    (if (zero? n)
+        (G u)
+        (H (F (- n 1) (K n u))
+            n
+            u))))</code></pre>
+            </div>
+            <div>
+                <p>Les fonctions <code>G</code>, <code>H</code> et <code>K</code> sont supposées déjà définies.</p>
+                <p><code>u</code> représente une suite de 0, 1 ou plusieurs arguments ; (une suite de 0 argument se réduit à
+                    rien !).</p>
+                <p>Le calcul de <code class="language-scheme">(F 0 u)</code> n'implique pas d'appel récursif.</p>
+                <p>Le calcul de <code class="language-scheme">(F n u)</code> implique celui de <code
+                        class="language-scheme">(F (- n 1) (K n u))</code> si <code>n</code> n'est pas nul.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels II</h3>
+    
+        <p>Schéma de base <em>simplifié</em> : </p>
+        <p>Le cas où <code>u</code> est absent suffit souvent :</p>
+        <pre class=""><code class="language-scheme">(define F
+  (lambda (n)
+    (if (zero? n)
+        c ; le numéro n, une constante, ...
+        (H (F (- n 1))
+            n))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels III</h3>
+    
+        <p>Exemple : </p>
+
+        <div class="columns two">
+            <div>
+                <pre class=""><code class="language-scheme">(define harmonic-sum
+  (lambda (n)
+    (if (zero? n)
+        0
+        (+ (/ 1.0 n) 
+           (harmonic-sum (- n 1))))))</code></pre>
+           <pre class="input next"><code class="language-scheme">&gt; (harmonic-sum 5)</code></pre>
+           <pre class="output next"><code class="language-">2.283333333333333</code></pre>
+        </div>
+           <div>
+                <pre class="next"><code class="language-scheme">(define F
+  (lambda (n)
+    (if (zero? n)
+        c
+        (H (F (- n 1))
+           n))))</code></pre> 
+                <pre class="next"><code class="language-scheme">(define c 0)</code></pre>       
+                <pre class="next"><code class="language-scheme">(define H 
+  (lambda (x n) 
+    (+ (/ 1.0 n) x)))</code></pre>       
+            </div>
+        </div>
+
+        <br />
+        <p class="next note">Remarque : nous discuterons du <em>tail recursion</em> en plus de détail plus tard dans ce cours.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels IV</h3>
+    
+        <p>Exemple : </p>
+
+        <div class="columns two">
+            <div>
+                <pre class=""><code class="language-scheme">(define mult
+  (lambda (n u)
+    (if (zero? n)
+        0
+        (+ u (mult (- n 1) u)))))</code></pre>
+           <pre class="input next"><code class="language-scheme">&gt; (mult 5 4)</code></pre>
+           <pre class="output next"><code class="language-">20</code></pre>
+        </div>
+           <div>
+                <pre class="next"><code class="language-scheme">(define F
+  (lambda (n u)
+    (if (zero? n)
+        (G u)
+        (H (F (- n 1) (K n u))
+           n 
+           u))))</code></pre> 
+                <pre class="next"><code class="language-scheme">(define G (lambda (u) 0))</code></pre>       
+                <pre class="next"><code class="language-scheme">(define K (lambda (n u) u))</code></pre>       
+                <pre class="next"><code class="language-scheme">(define H
+  (lambda (x n u)
+    (+ u x)))</code></pre>       
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels V</h3>
+    
+        <p>Exemple : </p>
+    
+        <pre class=""><code class="language-scheme">(define fact
+  (lambda (n)
+    (if (zero? n)
+        1
+        (* n (fact (- n 1))))))</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact 5)</code></pre>
+        <pre class="output next"><code class="language-">120</code></pre>
+    </section>
+
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels VI</h3>
+    
+        <p>Exemple : </p>
+    
+        <pre class=""><code class="language-scheme">(define cbin
+  (lambda (n u)
+    (if (zero? n)
+        1
+        (/ (* (cbin (- n 1) (- u 1)) u) n))))</code></pre>
+
+        <p class="note next">Attention au noms des variables : <code class="language-scheme">(cbin n u)</code> à 
+            $\binom{u}{n} = \frac{u!}{n!(u-n)!} = \prod_{i=1}^{n}\frac{u+1-i}{i}$</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (cbin 3 4)</code></pre>
+        <pre class="output next"><code class="language-">4</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels VII</h3>
+    
+        <p>Les schémas sont d'abord des schémas de pensée ; ils suggèrent d'exprimer $f(n)$ en termes d'expressions indépendantes de f, mais aussi
+            de $f(n - 1)$, si $n \gt 0$. Les schémas imposent en outre la syntaxe du programme : le programmeur doit seulement
+            définir les fonctions <code>G</code>, <code>H</code> et <code>K</code>.</p>
+        <p>Exemple : </p>
+    
+        <pre class=""><code class="language-scheme">(define cbin
+  (lambda (n u)
+    (if (zero? n)
+        1
+        (/ (* (cbin (- n 1) (- u 1)) u) n))))</code></pre>
+
+        <p>...</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les naturels VIII</h3>
+    
+        <pre class=""><code class="language-scheme">; (define cbin
+;  (lambda (n u)
+;    (if (zero? n)
+;        1
+;        (/ (* (cbin (- n 1) (- u 1)) u) n))))</code></pre>
+        <pre class="next"><code class="language-scheme">(define F
+  (lambda (n u)
+    (if (zero? n)
+        (G u)
+        (H (F (- n 1) (K n u)) n u))))</code></pre> 
+        <pre class="next"><code class="language-scheme">(define G (lambda (u) 1))</code></pre>       
+        <pre class="next"><code class="language-scheme">(define K (lambda (n u) (- u 1)))</code></pre>       
+        <pre class="next"><code class="language-scheme">(define H (lambda (r n u) (/ (* r u) n)))</code></pre> 
+        <pre class="next"><code class="language-scheme">(define cbin F)</code></pre>     
+    </section>
+
+    <section class="slide">
+        <h3>Listes : représentation arborescente</h3>
+        
+        <p>Il existe une correspondance naturelle entre les listes et les arbres. Chaque nœud de l'arbre a un nombre fini
+            quelconque de fils.</p>
+        
+        <div><img src="./chapter-06/tree-1.png" width="60%" alt="Représentation arborescente de l'expression (a (b c d) ((e f) g))." /></div>
+        
+        <p>ATTENTION ! Cette représentation commode des listes <strong>n'est pas</strong> celle employée en machine !</p>
+        
+        <p>Remarque. Un arbre réduit à sa racine et étiqueté par un symbole atomique ne sera pas représenté par une liste
+            mais par ce symbole.</p>
+        
+            <p>Remarque. Conceptuellement, seuls les nœuds terminaux de l'arbre représenté ici sont étiquetés ; les étiquettes
+            attachées aux nœuds internes sont synthétisées à partir des étiquettes des nœuds successeurs.
+            <strong>Les arbres dont les nœuds internes sont étiquetés (indépendamment des feuilles) forment un autre type de
+                données.</strong></p>
+    </section>
+
+    <section class="slide">
+        <h3>Listes : récursivité superficielle I</h3>
+    
+        <p>[[<code>l</code>]] est soit <code>()</code>, soit [[<code class="language-scheme">(cons (car l) (cdr l))</code>]].</p>
+    
+        <p>Toute liste s'obtient à partir de <code>()</code> et de <code>cons</code> ;
+            la règle de construction est simple : ([[a1]] [[a2]] ... [[an]])
+            s'obtient en évaluant <br /> <code class="language-scheme">(cons a1 (cons a2 (cons ... (cons an '()) ...)))</code></p>
+    
+        <p>Schéma de base :</p>
+
+        <div class="columns two">
+            <div class="next">
+                <pre class=""><code class="language-scheme">(define F
+  (lambda (l u)
+    (if (null? l)
+        (G u)
+        (H (F (cdr l) (K l u))
+           l
+           u))))</code></pre>
+            </div>
+            <div>
+                <p class="next">Les fonctions <code>G</code>, <code>H</code> et <code>K</code> sont supposées déjà définies ; <code>u</code> représente une suite de 0, 1 ou plusieurs arguments.</p>
+
+                <p class="next">Calculer <code class="language-scheme">(F () u)</code> n'implique pas d'appel récursif.</p>
+
+                <p class="next">Calculer <code class="language-scheme">(F l u)</code> implique l'appel <code class="language-scheme">(F (cdr l) (K l u))</code> si <code>l</code> n'est pas vide.</p>
+            </div>
+        </div>    
+    </section>
+
+    <section class="slide">
+        <h3>Listes : récursivité superficielle II</h3>
+    
+        <p>Le cas où $|u| = 0$ suffit souvent :</p>
+
+        <pre class=""><code class="language-scheme">(define F
+  (lambda (l)
+    (if (null? l)
+        c
+        (H (F (cdr l))
+           l))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes : récursivité superficielle III</h3>
+    
+        <pre class=""><code class="language-scheme">(define length
+  (lambda (l)
+    (if (null? l) 0 (+ 1 (length (cdr l))))))</code></pre>
+          
+        <pre class="input next"><code class="language-scheme">&gt; (length '(f o o bar))</code></pre>
+        <pre class="output next"><code class="language-">4</code></pre>
+
+        <pre class="next"><code class="language-scheme">(define append
+  (lambda (l v)
+    (if (null? l) v (cons (car l) (append (cdr l) v)))))</code></pre>
+                    
+        <pre class="input next"><code class="language-scheme">&gt; (append '(f o o) '(bar))</code></pre>
+        <pre class="output next"><code class="language-">(f o o bar)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes : récursivité superficielle IV</h3>
+    
+        <pre class=""><code class="language-scheme">(define reverse
+  (lambda (l)
+    (if (null? l) '() (append (reverse (cdr l)) (list (car l))))))</code></pre>
+          
+        <pre class="input next"><code class="language-scheme">&gt; (reverse '(f o o bar))</code></pre>
+        <pre class="output next"><code class="language-">(bar o o f)</code></pre>
+
+        <pre class="next"><code class="language-scheme">(define map
+  (lambda (f l)
+    (if (null? l) '() (cons (f (car l)) (map f (cdr l))))))</code></pre>
+                    
+        <pre class="input next"><code class="language-scheme">&gt; (map (lambda (x) (* x x)) '(1 2 3 4 5 6))</code></pre>
+        <pre class="output next"><code class="language-">(1 4 9 16 25 36)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Listes : récursivité superficielle V</h3>
+
+        <pre class=""><code class="language-scheme">(define map
+  (lambda (f l)
+    (if (null? l) '() (cons (f (car l)) (map f (cdr l))))))</code></pre>
+
+        <p>s'obtient en instanciant le schéma</p>
+
+        <div class="columns two">
+            <div>
+                <pre class="next"><code class="language-scheme">(define F
+  (lambda (l u)
+    (if (null? l)
+      (G u)
+      (H (F (cdr l) (K l u))
+         l
+         u))))</code></pre>
+            </div>
+            <div>
+                <pre class="next"><code class="language-scheme">(define G (lambda (u) '()))</code></pre>       
+                <pre class="next"><code class="language-scheme">(define K (lambda (l u) u))</code></pre>       
+                <pre class="next"><code class="language-scheme">(define H 
+  (lambda (r l u) 
+    (cons (u (car l)) r)))</code></pre> 
+                <pre class="next"><code class="language-scheme">(define map 
+  (lambda (f l) (F l f)))</code></pre>     
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Retournement superficiel ("reverse")</h3>
+
+        <pre class=""><code class="language-scheme">(define reverse
+  (lambda (l)
+    (if (null? l) '() (append (reverse (cdr l)) (list (car l))))))</code></pre>
+
+        <br />
+
+        <p>L'appel récursif porte sur le <code>cdr</code> seul.</p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (reverse '(a (b c d) ((e f) g)))</code></pre>
+        <pre class="output next"><code class="language-">(((e f) g) (b c d) a)</code></pre>
+
+        <div class="next columns two">
+            <div>
+                <p>Argument :</p>
+                <img src="./chapter-06/tree-1.png" width="100%" alt="Représentation arborescente de l'expression (a (b c d) ((e f) g))." />
+            </div>
+            <div>
+                <p>Résultat :</p>
+                <img src="./chapter-06/tree-2.png" width="100%" alt="Représentation arborescente de l'expression (((e f) g) (b c d) a)." />
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Tri par insertion I</h3>
+
+        <pre class=""><code class="language-scheme">(define insert
+  (lambda (x l comp) ;; comp est un argument procédural
+    (cond ((null? l) (list x))
+          ((comp x (car l)) (cons x l))
+          (else (cons (car l) (insert x (cdr l) comp))))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (insert 3 '(0 2 3 3 5 7 8 9) &lt;)</code></pre>
+        <pre class="output next"><code class="language-">(0 2 3 3 3 5 7 8 9)</code></pre>
+
+        <p class="next">Où ce "3" a-t-il été inséré ?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Tri par insertion II</h3>
+
+        <pre class=""><code class="language-scheme">(define sort
+  (lambda (l comp) ;; comp est un argument procédural
+    (if (null? l)
+        l
+        (insert (car l) (sort (cdr l) comp) comp))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (sort '(8 3 5 7 2 3 9 0) &lt;=)</code></pre>
+        <pre class="output next"><code class="language-">(0 2 3 3 5 7 8 9)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (sort '(8 3 5 7 2 3 9 0) &gt;=)</code></pre>
+        <pre class="output next"><code class="language-">(9 8 7 5 3 3 2 0)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Tri par insertion III</h3>
+
+        <sub>
+            <pre class=""><code class="language-scheme">; (define insert
+;   (lambda (x l comp) ;; comp est un argument procédural
+;     (cond ((null? l) (list x))
+;           ((comp x (car l)) (cons x l))
+;           (else (cons (car l) (insert x (cdr l) comp))))))</code></pre>
+            
+            <pre class=""><code class="language-scheme">(define F
+  (lambda (l u1 u2)
+    (if (null? l)
+        (G u1 u2)
+        (H (F (cdr l) (K1 l u1 u2) (K2 l u1 u2)) l u1 u2))))</code></pre>
+            
+            <pre class="next"><code class="language-scheme">(define G (lambda (u1 u2) (list u1)))</code></pre>
+            <pre class="next"><code class="language-scheme">(define H (lambda (r l u1 u2) (if (u2 u1 (car l)) (cons u1 l) (cons (car l) r))))</code></pre>
+            <pre class="next"><code class="language-scheme">(define K1 (lambda (l u1 u2) u1))</code></pre>
+            <pre class="next"><code class="language-scheme">(define K2 (lambda (l u1 u2) u2))</code></pre>
+            <pre class="next"><code class="language-scheme">(define insert (lambda (x l comp) (F l x comp)))</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Tri par insertion IV</h3>
+
+        <sub>
+            <pre class=""><code class="language-scheme">; (define sort
+;   (lambda (l comp) ;; comp est un argument procédural
+;     (if (null? l)
+;         l
+;         (insert (car l) (sort (cdr l) comp) comp))))</code></pre>
+            
+            <pre class=""><code class="language-scheme">(define F
+  (lambda (l u)
+    (if (null? l)
+        (G u)
+        (H (F (cdr l) (K l u)) l u))))</code></pre>
+            
+            <pre class="next"><code class="language-scheme">(define G (lambda (u) '()))</code></pre>
+            <pre class="next"><code class="language-scheme">(define H (lambda (r l u) (insert (car l) r u)))</code></pre>
+            <pre class="next"><code class="language-scheme">(define K (lambda (l u) u))</code></pre>
+            <pre class="next"><code class="language-scheme">(define sort (lambda (l comp) (F l comp)))</code></pre>
+        </sub>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
