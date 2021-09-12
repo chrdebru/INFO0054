@@ -75,7 +75,7 @@
         <h2>Chapitre 06: Récursivité structurelle</h2>
         <h3>Principe de la récursivité structurelle</h3>
     
-        <p>Le système “accepte” toute définition récursive syntaxiquement correcte, même si la procédure associée donne lieu
+        <p>Le système "accepte" toute définition récursive syntaxiquement correcte, même si la procédure associée donne lieu
             à des calculs infinis. L'utilisateur doit savoir si, dans un domaine donné, le calcul se terminera toujours.
             Pour les domaines usuels, des schémas existent qui garantissent la terminaison.</p>
         <p>Cas particulier : les schémas <em>structurels</em>, basés sur la manière dont les objets du domaine de calcul sont
@@ -505,6 +505,503 @@
             <pre class="next"><code class="language-scheme">(define sort (lambda (l comp) (F l comp)))</code></pre>
         </sub>
     </section>
+
+    <section class="slide">
+        <h3>Tri par insertion (ordre lexicographique) - I</h3>
+
+        <pre class="input"><code class="language-scheme">&gt; (sort '("bb" "ac" "bc" "acb") string&lt;=?)</code></pre>
+        <pre class="output next"><code class="language-">("ac" "acb" "bb" "bc")</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Tri par insertion (ordre lexicographique) - II</h3>
+
+        <pre class="next"><code class="language-scheme">(define lex
+  (lambda(str-ord iden) ;; arguments procéduraux
+    (lambda (u v)
+    (cond ((null? u) #t)
+          ((null? v) #f)
+          ((str-ord (car u) (car v)) #t)
+          ((iden (car u) (car v)) ((lex str-ord iden) (cdr u) (cdr v)))
+          (else #f)))))</code></pre>
+
+        <pre class="next"><code class="language-scheme">(define numlex (lex &lt; =))</code></pre>
+        <pre class="next"><code class="language-scheme">(define alpha (lex string&lt;? string=?))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (sort '((2 3) (1 4) (2 3 2) (1 3)) numlex)</code></pre>
+        <pre class="output next"><code class="language-">((1 3) (1 4) (2 3) (2 3 2))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (sort '(("acb" "ac") ("ac" "acb") ("ac")) alpha)</code></pre>
+        <pre class="output next"><code class="language-">(("ac") ("ac" "acb") ("acb" "ac"))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité profonde sur les listes I</h3>
+
+        <div class="columns two">
+            <div>
+                <p>Schéma de base :</p>
+                <sub><pre class=""><code class="language-scheme">(define F
+  (lambda (l u)
+    (cond ((null? l) (G u))
+          ((atom? (car l))
+           (H (F (cdr l) (K l u))
+              l
+              u))
+          ((list? (car l))
+           (J (F (car l) (Ka l u))
+              (F (cdr l) (Kd l u))
+              l
+              u)))))</code></pre></sub>
+            </div>
+            <div>
+                <p>Schéma simplifié :</p>
+                <sub><pre class=""><code class="language-scheme">(define F
+  (lambda (l)
+    (cond ((null? l) c)
+          ((atom? (car l))
+           (H (F (cdr l)) l))
+          ((list? (car l))
+           (J (F (car l))
+              (F (cdr l))
+              l)))))</code></pre></sub>
+            </div>
+        </div>
+        <br />
+        <p>Remarque. On exclut (provisoirement) de rencontrer dans la liste <code>l</code> des objets qui ne soient ni des listes ni des atomes.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité profonde sur les listes II</h3>
+
+        <sub>
+            <div class="columns two">
+                <div>
+                    <pre class=""><code class="language-scheme">(define flat-l
+  (lambda (l)
+    (cond ((null? l) '())
+          ((atom? (car l))
+           (if (null? (car l))
+               (flat-l (cdr l))
+               (cons (car l)
+                     (flat-l (cdr l)))))
+          ((list? (car l))
+           (append (flat-l (car l))
+                   (flat-l (cdr l)))))))</code></pre>
+                </div>
+                <div>
+                    <p>Attention ! En Racket, la fonction <code>atom?</code> n'existe pas. </p>
+                    <p>Vous pouvez le définir en tant que :</p>
+                    <br />
+                    <pre class=""><code class="language-scheme">(define atom?
+  (lambda (x)
+    (and (not (null? x))
+         (not (pair? x)))))</code></pre>
+                </div>
+            </div>
+
+            <pre class="input next"><code class="language-scheme">&gt; (flat-l 5)</code></pre>
+            <pre class="error next"><code class="language-scheme">car: contract violation
+ expected: pair?
+ given: 5</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (flat-l '())</code></pre>
+            <pre class="output next"><code class="language-scheme">()</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (flat-l '(0 (1 2) ((((3))) 4) 5))</code></pre>
+            <pre class="output next"><code class="language-scheme">(0 1 2 3 4 5)</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité profonde sur les listes III</h3>
+
+        <p>Les listes ont pour éléments des objets d'un certain type (par exemple, des atomes) et aussi d'autres listes. On peut
+            décider d'adjoindre à ce domaine celui des objets (atomes). Cela revient à admettre les arbres réduits à une
+            racine (qui est en même temps l'unique feuille).
+            Les schémas précédents s'adaptent facilement.</p>
+        <sub>
+            <div class="columns two">
+                <div>
+                    <pre class=""><code class="language-scheme">(define F
+  (lambda (l)
+    (cond ((null? l) c)
+          ((atom? (car l))
+           (H (F (cdr l)) l))
+          ((list? (car l))
+           (J (F (car l))
+              (F (cdr l))
+              l)))))</code></pre>
+                </div>
+                <div class="next">
+                    <pre class=""><code class="language-scheme">(define F
+  (lambda (l)
+    (cond ((null? l) c)
+          ((atom? l)
+           (G l))
+          ((list? l)
+           (J (F (car l))
+              (F (cdr l))
+              l)))))</code></pre>
+                </div>
+            </div>
+        </sub>
+        <br />
+        <p class="next">Remarque. Le remplacement de <code>list?</code> par <code>pair?</code> améliore l'efficacité.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité profonde sur les listes IV</h3>
+
+        <pre class=""><code class="language-scheme">(define flat-le
+  (lambda (l)
+    (cond ((null? l) '())
+          ((atom? l) (list l))
+          ((list? l) (append (flat-le (car l)) (flat-le (cdr l)))))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (flat-le 5)</code></pre>
+        <pre class="output next"><code class="language-scheme">(5)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flat-le '())</code></pre>
+        <pre class="output next"><code class="language-scheme">()</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flat-le '(0 (1 2) ((((3))) 4) 5))</code></pre>
+        <pre class="output next"><code class="language-scheme">(0 1 2 3 4 5)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Retournement profond ("<code>deeprev</code>")</h3>
+
+        <pre class=""><code class="language-scheme">(define deeprev
+  (lambda (l)
+    (cond ((null? l) '())
+          ((atom? l) l)
+          ((list? l)
+           (append (deeprev (cdr l))
+                   (list (deeprev (car l))))))))</code></pre>
+        <br />
+        <p>L'appel récursif porte sur le <code>car</code> et le <code>cdr</code>.</p>
+    </section>
+
+    <section class="slide">
+        <p>Argument :</p>
+        <img src="./chapter-06/tree-3.png" width="100%" alt="Représentation arborescente de '(a (b c d) ((e f) g))." />
+        <p>Résultat :</p>
+        <img src="./chapter-06/tree-4.png" width="100%" alt="Représentation arborescente de '((g (f e)) (d c b) a)." />
+    </section>
+
+    <section class="slide">
+        <h3>Remarque sur les schémas</h3>
+
+        <p>Suivre un schéma "à la lettre", c'est-à-dire se limiter strictement à instancier les paramètres qu'il contient, rend
+            la programmation particulièrement méthodique et sûre. <br />On peut cependant, pour diverses raisons, garder "l'esprit" d'un schéma sans respecter la lettre (sa syntaxe
+            précise). Un exemple classique est le programme <code>flatten</code>, version équivalente mais plus 
+            efficace de <code>flat-le</code> :</p>
+
+        <pre class=""><code class="language-scheme">(define flatten
+  (lambda (l u)
+    (cond ((null? l) u)
+          ((atom? l) (cons l u))
+          ((list? l) (flatten (car l) (flatten (cdr l) u))))))</code></pre>
+
+        <p>On montre facilement que les valeurs de <code class="language-scheme">(flatten l u)</code> et de
+            <br /><code class="language-scheme">(append (flat-le l) u)</code> sont égales pour toutes listes <code>l</code> et <code>u</code> ; 
+            en particulier, <code class="language-scheme">(flatten l '())</code> et 
+            <code class="language-scheme">(flat-le l)</code> ont même
+            valeur. Par contre, flatten n'est pas une instance du schéma, même s'il s'en inspire nettement.</p>
+        
+        <p>On concilie méthode, discipline et créativité...</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle généralisée I</h3>
+    
+        <p>Le principe de la récursivité structurelle est que la structure du programme 
+            est calquée sur celle des données.</p>
+    
+        <p>Exprimer $f(x,...)$ en termes de $\{f(y,...) : y \prec x\}$ <br />
+            où $y \prec x$ signifie $y$ composant de $x$.</p>
+    
+        <p>On peut généraliser :</p>
+    
+        <ul>
+            <li>
+                Admettre aussi les composants non immédiats :
+                <ul>
+                    <li><code>(- n 1)</code>, mais aussi <code>(- n 2)</code>, <code>(/ n 2)</code>,...</li>
+                    <li><code>(cdr l)</code>, mais aussi <code>(cddr l)</code>,...</li>
+                </ul>
+            </li>
+            <li>Admettre plusieurs appels récursifs.</li>
+            <li>Admettre les appels imbriqués.</li>
+        </ul>
+        <p>La terminaison reste garantie mais pas l'efficacité !</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle généralisée II</h3>
+    
+        <p>Attention aux erreurs grossières, telles les évaluations de <code>(f (- n 2))</code> avec $n \leq 1$, et de
+            <code>(f (cddr l))</code> où l comporte moins de deux éléments.</p>
+    
+        <pre class="next"><code class="language-scheme">(define fib 
+  (lambda (n)
+    (if (&lt; n 2) 
+        n
+        (+ (fib (- n 1)) (fib (- n 2))))))</code></pre>
+
+        <p class="next">Pour quoi est-ce que <code>fib</code> est inefficace ?</p>
+    
+        <pre class="next"><code class="language-scheme">(define exp
+  (lambda (m n)
+    (cond ((zero? n) 1)
+          ((even? n) (exp (* m m) (/ n 2)))
+          ((odd? n) (* m (exp m (- n 1)))))))</code></pre>
+
+          <p class="next">Pour quoi est-ce que <code>exp</code> est très efficace ?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle mixte</h3>
+    
+        <p>Le principe de la récursivité structurelle est : Exprimer $f(x,...)$ en termes de $\{f(y,...) : y \prec x\}$ ;
+            l'induction porte sur un seul argument.</p>
+
+        <p>Le principe de la récursivité structurelle mixte est : Exprimer $f(x_1,x_2,...)$ en termes de
+            $\{f(y_1,x_2,...),f(x_1,y_2,...),f(y_1,y_2,...) : y_1 \prec x_1 \wedge y_2 \prec x_2\}$. L'induction porte sur plusieurs
+            arguments; si $f(a,b)$ dépend de $f(c,d)$, alors $c \prec a \wedge d \preceq b$ ou $c \preceq a \wedge d \prec b$.</p>
+
+        <p>La terminaison reste garantie.</p>
+
+        <pre class=""><code class="language-scheme">(define gcd
+  (lambda (x y)
+    (cond ((= x y) x)
+          ((&gt; x y) (gcd (- x y) y))
+          ((&lt; x y) (gcd x (- y x))))))</code></pre>
+
+        <p>Exemples classiques (voir plus loin) : knapsack, money change,...</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle I</h3>
+    
+        <p><sub>
+            On peut “dérécursiver” le schéma classique
+                $fact(n) := \text{if n = 0 then 1 else } n \times fact(n - 1)$ en l'écriture
+                $fact_m(n) := \text{if n = 0 then 1 else } n \times fact_{m-1}(n-1)$. <br />
+                La récursivité revient (sous forme dégénérée) pour définir globalement les fonctions $fact_m$ :
+        </sub></p>
+    
+        <pre class="next"><code class="language-scheme">(define f
+  (lambda (m c)
+    (if (zero? m)
+        c
+        (f (- m 1) (lambda (n) (if (= n 0) 1 (* n (c (- n 1)))))))))</code></pre>
+
+        <p class="next specification">Si [[<code>m</code>]] = $m$ et [[<code>c</code>]] = $fact_p$, alors
+            [[<code>(f m c)</code>]] = $fact_{p+m}$</p>
+
+        <pre class="next"><code class="language-scheme">(define fact0 'emptyfunction)
+(define fact (lambda (n) ((f (+ n 1) fact0) n)))</code></pre>
+          
+        <p class="next"><sub>On observe que $fact_m$ a pour domaine $\{0,1,...,m - 1\}$. Sur ce domaine, on a $fact_m(n) = n!$.</sub></p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle II</h3>
+    
+        <pre class=""><code class="language-scheme">;; Si [[m]] = m et [[c]] = fact_{p}, alors [[(f m c)]] = fact_{p+m}
+(define f
+  (lambda (m c)
+    (if (zero? m)
+        c
+        (f (- m 1) (lambda (n) (if (= n 0) 1 (* n (c (- n 1)))))))))
+
+(define fact0 'emptyfunction)
+(define fact (lambda (n) ((f (+ n 1) fact0) n)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle III</h3>
+    
+        <p>Exemples :</p>
+    
+        <pre class="input next"><code class="language-scheme">&gt; (define fact8 (f 8 fact0))</code></pre>
+        <pre class="output next"><code class="language-">...</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact8 7)</code></pre>
+        <pre class="output next"><code class="language-">5040</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact8 8)</code></pre>
+        <pre class="error next"><code class="language-">application: not a procedure;
+expected a procedure that can be applied to arguments
+given: emptyfunction</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (fact 8)</code></pre>
+        <pre class="output next"><code class="language-">40320</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle IV</h3>
+    
+        <p>On a séparé</p>
+        <ul>
+            <li>le <em>calcul</em> de la fonction $fact_p$</li>
+            <li>l'<em>application</em> de cette fonction è un argument. On a $fact(n) = fact_p(n)$ si $p \gt n$; on choisit $p = n+1$.</li>
+        </ul>
+    
+        <p>Cette technique de séparation fonctionnelle n'apporte rien dans le cas très simple de la fonction factorielle
+            mais, dans le cadre général de la définition récursive de fonctions, cette technique sera parfois très
+            utile !</p>
+    
+        <p>Plus généralement, l'introduction de paramètres fonctionnels et/ou de fonctionnelles auxiliaires définies
+            récursivement est une technique importante.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle V - Processus de calcul</h3>
+    
+        <sub><pre class=""><code class="language-scheme">(define fact (lambda (n) ((f (+ n 1) fact0) n)))
+(define f
+  (lambda (m c)
+    (if (zero? m)
+        c
+        (f (- m 1) (lambda (n) (if (= n 0) 1 (* n (c (- n 1)))))))))
+
+(fact 8)
+((f 9 fact0) 8)
+((f 8 (lambda (n) (if (= n 0) 1 (* n (fact0 (- n 1)))))) 8)
+((f 8 fact1) 8)
+...
+((f 0 fact9) 8)
+(fact9 8)
+(* 8 (* ... 1))
+...
+(* 8 5040)
+40320</code></pre></sub>
+        <p>L'expansion fonctionnelle précède le calcul arithmétique.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle VI</h3>
+    
+        <p>Double comptage :</p>
+        <pre class="input"><code class="language-scheme">&gt; (count '(a b a c d a c) 'a)</code></pre>
+        <pre class="output"><code class="language-">(3 . 4)</code></pre>
+        <p>3 occurrences de "a", 4 autres occurrences.</p>
+
+        <div class="next">
+            <p>Solution simple : utiliser deux fonctions auxiliaires.</p>
+            <pre class=""><code class="language-scheme">(define count0 (lambda (l s) (cons (c-eq l s) (c-dis l s))))</code></pre>
+        </div>
+
+        <p class="next">Problème : on parcourt la liste <code>l</code> deux fois.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle VII</h3>
+    
+        <p>Solution naïve : utiliser le schéma habituel.</p>
+        <sub><pre class=""><code class="language-scheme">(define count1
+  (lambda (l s)
+    (if (null? l)
+        (cons 0 0)
+        (if (eq? (car l) s)
+            (cons (1+ (car (count1 (cdr l) s))) (cdr (count1 (cdr l) s)))
+            (cons (car (count1 (cdr l) s)) (1+ (cdr (count1 (cdr l) s))))))))</code></pre></sub>
+
+        <br />
+        
+        <p>L'inefficacité est catastrophique, mais on peut y remédier simplement.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle VIII</h3>
+    
+        <p>La séparation fonctionnelle est une solution possible :</p>
+        <sub><pre class=""><code class="language-scheme">(define c2 ;; écrire une spécification ! 
+  (lambda (l s c)
+    (if (null? l)
+        c
+        (if (eq? (car l) s)
+            (c2 (cdr l) s (lambda (u) (c (cons (1+ (car u)) (cdr u)))))
+            (c2 (cdr l) s (lambda (u) (c (cons (car u) (1+ (cdr u))))))))))
+        
+(define id (lambda (v) v))
+(define count2 (lambda (l s) ((c2 l s id) '(0 . 0))))</code></pre></sub>
+
+        <br />
+        
+        <p>Si $l$ est la longueur de la liste <code>l</code>, les temps d'exécution 
+            de <code>(count0 l)</code> et de <code>(count2 l)</code> sont proportionnels 
+            à $l$ ; celui de <code>(count1 l)</code> est proportionnel à $2^l$.</p>
+
+        <p>(On verra d'autres solutions pour ce probl`eme plus loin.)</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle IX</h3>
+    
+        <p>Spécification de <code>c2</code> : </p>
+        <sub><pre class=""><code class="language-scheme">(define (cx p1) ;; uniquement pour faciliter la sp ́ecification
+  (lambda (p2) (cons (+ (car p1) (car p2)) (+ (cdr p1) (cdr p2)))))</code></pre></sub>
+
+        <br />
+
+        <p class="next specification">Si [[<code>(count2 l s)</code>]] = [[<code>(cons a b)</code>]], <br />
+            alors [[<code>(c2 l s (cx (cons u v)))</code>]] = [[<code>(cx (cons (+ u a) (+ v b)))</code>]]</p>
+
+        <sub><pre class="next "><code class="language-scheme">;; Si [[(count2 l s)]] = [[(cons a b)]],
+;; alors [[(c2 l s (cx (cons u v)))]] = [[(cx (cons (+ u a) (+ v b)))]]
+(define c2
+  (lambda (l s c)
+    (if (null? l)
+        c
+        (if (eq? (car l) s)
+            (c2 (cdr l) s (lambda (u) (c (cons (1+ (car u)) (cdr u)))))
+            (c2 (cdr l) s (lambda (u) (c (cons (car u) (1+ (cdr u))))))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle X</h3>
+    
+        <p>Produit de liste : $l \to \prod_{x \in l} x$.</p>
+        <sub><pre class=""><code class="language-scheme">(define pl1
+  (lambda (l)
+    (cond ((null? l) 1)
+          ((zero? (car l)) 0)
+          (else (* (car l) (pl1 (cdr l)))))))</code></pre></sub>
+
+        <br />
+        
+        <p class="next">Si un facteur est nul, comment éviter toutes les multiplications ? Ici aussi, 
+            la séparation fonctionnelle permet une solution.</p>
+
+        <sub><pre class="next"><code class="language-scheme">(define p2 ;; écrire une spécification !
+  (lambda (l c)
+    (cond ((null? l) c)
+          ((zero? (car l)) (lambda (v) 0))
+          (else (p2 (cdr l) (lambda (u) (* (car l) (c u))))))))
+
+(define pl2 (lambda (l) ((p2 l id) 1)))</code></pre></sub>
+
+        <br />
+
+        <p class="next">(On verra d'autres solutions pour ce problème plus loin.)</p>
+    </section>
+
+    <section class="slide">
+        <h3>Séparation fonctionnelle XI</h3>
+    
+        <p>Spécification de <code>p2</code> : </p>
+
+        <p class="next specification">Si [[<code>l</code>]] est une liste de nombres dont le produit vaut $a$, <br /> 
+            et si [[<code>c</code>]] est la fonction $[x \to bx]$, <br />
+            alors [[<code>(p2 l c)</code>]] est la fonction $[x \to abx]$.</p>
+
+        <sub><pre class="next "><code class="language-scheme">;; Si [[l]] est une liste de nombres dont le produit vaut a, 
+;; et si [[c]] est la fonction [x -&gt; bx],
+;; alors [[(p2 l c)]] est la fonction [x -&gt; abx].
+(define p2 
+  (lambda (l c)
+    (cond ((null? l) c)
+          ((zero? (car l)) (lambda (v) 0))
+          (else (p2 (cdr l) (lambda (u) (* (car l) (c u))))))))</code></pre></sub>
+    </section>
+
 
     <div class="progress"></div>
 
