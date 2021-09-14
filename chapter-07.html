@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 07: Accumulateurs, processus itératifs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        @page {
+           size: 1024px 768px;
+           border: 1px solid black;
+        }
+        
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px; 
+            color: red;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 07: Accumulateurs, processus itératifs</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 07: Accumulateurs, processus itératifs</h2>
+        <p>Idée de base : Un accumulateur est un argument supplémentaire, 
+            lié à des résultats intermédiaires à mémoriser.</p>
+        <p>L’exploitation de la définition</p>
+        <pre class=""><code class="language-scheme">(define fact (lambda (n) (if (zero? n) 1 (* n (fact (- n 1))))))</code></pre>
+        <p>crée le processus de gauche, alors que l’associativité de la multiplication permettrait 
+            celui de droite, plus simple :</p>
+            
+        <sub>
+            <div class="columns two">
+                <div>
+                    <pre class=""><code class="language-scheme">(fact 4)
+(* 4 (fact 3))
+(* 4 (* 3 (fact 2)))
+(* 4 (* 3 (* 2 (fact 1))))
+(* 4 (* 3 (* 2 (* 1 (fact 0)))))
+(* 4 (* 3 (* 2 (* 1 1))))
+(* 4 (* 3 (* 2 1)))
+(* 4 (* 3 2))
+(* 4 6)
+24</code></pre>
+            </div>
+               <div>
+                    <pre class=""><code class="language-scheme">(fact 4)
+(* 4 (fact 3))
+(* 12 (fact 2))
+(* 24 (fact 1))
+(* 24 (fact 0))
+(* 24 1)
+24</code></pre>   
+                </div>
+            </div>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <p>L’intérêt du processus</p>
+
+        <pre class=""><code class="language-scheme">(* 1 (fact 4))
+(* 4 (fact 3))
+(* 12 (fact 2))
+(* 24 (fact 1))
+(* 24 (fact 0))
+24</code></pre>
+
+        <p>
+            est que chaque état est caractérisé par deux paramètres seulement. On
+            peut générer un tel processus très simplement, en faisant de ces
+            paramètres les arguments d’une fonction <code>fact-a</code> :
+        </p>
+
+        <pre class=""><code class="language-scheme">(fact-a 4 1)
+(fact-a 3 4)
+(fact-a 2 12)
+(fact-a 1 24)
+(fact-a 0 24)
+24</code></pre>   
+    </section>
+
+    <section class="slide">
+        <p>La définition de <code>fact-a</code> est évidente :</p>
+
+        <pre class=""><code class="language-scheme">(define fact-a
+  (lambda (n a)
+  (if (zero? n) a (fact-a (- n 1) (* a n)))))</code></pre>
+
+        <p class="next specification">Si [[<code>n</code>]] = $n$ et [[<code>a</code>]] = $a$, <br />
+            alors [[<code>(fact-a n a)</code>]] = $n!a$</p>
+
+        <div class="next">
+            <p>Le processus généré est analogue à celui associé à la boucle</p>
+            <pre class=""><code class="language-">while n > 0 do (a,n) := (a*n,n-1)</code></pre>
+        </div>
+
+        <div class="next">
+            <P>Processus itératif : espace-mémoire de contrôle constant.</P>
+            <pre class=""><code class="language-scheme">(define fact (lambda (n) (fact-a n 1)))</code></pre>
+        </div>
+    </section>
+
+    <section class="slide">
+        <p>Variante :</p>
+
+        On observe qu’au cours de l’exécution l’accumulateur a pour valeur un
+        produit partiel, tel $4 \times 3$ ou $4 \times 3 \times 2$ (si on calcule 4!). Rien n’empêche
+        d’utiliser plutôt des produits partiels du type $1 \times 2$ ou $1 \times 2 \times 3$.
+        On définit <code class="language-scheme">(fact-b n i b)</code> par la spécification suivante :
+
+        <p class="specification">
+            Si [[<code>n</code>]] = $n$, [[<code>i</code>]] = $i$ et [[<code>b</code>]] = $(i - 1)!$ et <br />
+            si $1 \leq i \leq n + 1$,
+            alors [[<code>(fact-b n i b)</code>]] = $n!$.
+        </p>
+
+        <div class="next">
+            <p>On peut écrire :</p>
+            <pre class=""><code class="language-scheme">(define fact-b
+  (lambda (n i b)
+    (if (> i n) b (fact-b n (+ i 1) (* b i)))))
+
+(define fact
+  (lambda (n) (fact-b n 1 1)))</code></pre>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Un exemple classique</h3>
+        
+        <pre class=""><code class="language-scheme">(define fib
+  (lambda (n)
+    (if (&lt; n 2) n (+ (fib (- n 1)) (fib (- n 2))))))</code></pre>
+
+        <p class="next">Problème : recalcul inutile de résultats intermédiaires.</p>
+        <p class="next">Solution : utiliser des accumulateurs.</p>
+
+        <div class="columns two">
+            <div>
+                <pre class="next"><code class="language-scheme">(define fib-a
+  (lambda (n a b)
+    (if (zero? n)
+        a
+        (fib-a (- n 1) b (+ a b)))))</code></pre>
+                <div class="next">
+                    <p>Processus itératif, comme pour la boucle</p>
+                    <pre class=""><code class="language-">while n &gt; 0 do (n,a,b) := (n-1,b,a+b)</code></pre>
+                </div>
+            </div>
+            <div>
+                <sub>
+                    <pre class="next"><code class="language-scheme">(fib-a 9 0 1)
+(fib-a 8 1 1)
+(fib-a 7 1 2)
+(fib-a 6 2 3)
+(fib-a 5 3 5)
+(fib-a 4 5 8)
+(fib-a 3 8 13)
+(fib-a 2 13 21)
+(fib-a 1 21 34)
+(fib-a 0 34 55)
+34</code></pre>
+                </sub>               
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Autres exemples numériques I</h3>
+        
+        <pre class=""><code class="language-scheme">(define expt
+  (lambda (m n)
+    (cond ((zero? n) 1)
+          ((even? n) (expt (* m m) (/ n 2)))
+          ((odd? n) (* m (expt m (- n 1)))))))</code></pre>
+        
+        <pre class="next"><code class="language-scheme">(define expt-a
+  (lambda (m n a)
+    (cond ((zero? n) a)
+          ((even? n) (expt-a (* m m) (/ n 2) a))
+          ((odd? n) (expt-a m (- n 1) (* m a))))))</code></pre>
+
+        <p class="specification next">
+            Si [[<code>m</code>]] = $m$, [[<code>n</code>]] = $n$ et [[<code>a</code>]] = $a$ 
+            alors [[<code>(expt-a m n a)</code>]] = $m^n \times a$ .
+        </p>
+        <pre class="input next"><code class="language-scheme">&gt; (expt 5 4)</code></pre>
+        <pre class="output next"><code class="language-">625</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (expt-a 5 4 10)</code></pre>
+        <pre class="output next"><code class="language-">6250</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Autres exemples numériques II</h3>
+        
+        <pre class=""><code class="language-scheme">(define cbin
+  (lambda (n u)
+    (if (zero? n)
+        1
+        (/ (* (cbin (- n 1) (- u 1)) u) n))))</code></pre>
+        
+        <pre class="next"><code class="language-scheme">(define cbin-a ;; à spécifier
+  (lambda (n u a)
+    (if (zero? n)
+        a
+        (cbin-a (- n 1) (- u 1) (/ (* u a) n)))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (cbin 4 6)</code></pre>
+        <pre class="output next"><code class="language-">15</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (cbin-a 4 6 1)</code></pre>
+        <pre class="output next"><code class="language-">15</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (cbin-a 4 6 10)</code></pre>
+        <pre class="output next"><code class="language-">150</code></pre>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
