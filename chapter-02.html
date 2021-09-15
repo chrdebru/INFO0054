@@ -110,7 +110,7 @@
                 </p>
                 <p>Cette notation implique que (+ 2 5) est une expression, et
                     que sa valeur, calculée par l'interpréteur Scheme, est 7.
-                    On écrit [[(+ 2 5)]] = 7.</p>
+                    On écrit [[<code>(+ 2 5)</code>]] = 7.</p>
             </li>
         </ul>
 
@@ -350,13 +350,13 @@
         <h3>Listes - Reconnaisseurs de listes</h3>
 
         <p>Reconnaître une liste : prédicat <code>list?</code> [[<code class="language-scheme">(list? l)</code>]] est
-            vrai si [[l]] est une liste.</p>
+            vrai si [[<code>l</code>]] est une liste.</p>
         <pre class="input next"><code class="language-scheme">&gt; (list? (cons 1 '()))</code></pre>
         <pre class="output next"><code class="language-">#t</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (list? (cons 1 2))</code></pre>
         <pre class="output next"><code class="language-">#f</code></pre>
         <p class="next">Reconnaître la liste vide : prédicat <code>null?</code> [[<code class="language-scheme">(null? l)</code>]]
-            est vrai si [[l]] est ().</p>
+            est vrai si [[<code>l</code>]] est <code>()</code>.</p>
         <pre class="input next"><code class="language-scheme">&gt; (null? (list 1 2 3))</code></pre>
         <pre class="output next"><code class="language-">#f</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (null? (list))</code></pre>
@@ -365,14 +365,14 @@
 
     <section class="slide">
         <h3>Listes - Décomposition des listes</h3>
-        <p>Si [[l]] est une liste non vide, son premier élément est [[<code class="language-scheme">(car l)</code>]] ;
+        <p>Si [[<code>l</code>]] est une liste non vide, son premier élément est [[<code class="language-scheme">(car l)</code>]] ;
             les éléments restants forment la liste [[<code class="language-scheme">(cdr l)</code>]].</p>
         <p>On a donc [[l]] = [[<code class="language-scheme">(cons (car l) (cdr l))</code>]].</p>
-        <p>Si [[a]] est un objet et [[l]] une liste, on a :</p>
+        <p>Si [[<code>a</code>]] est un objet et [[<code>l</code>]] une liste, on a :</p>
         <ul>
-            <li>[[<code class="language-scheme">(cons a l)</code>]] = ([[a]] . [[l]]), et </li>
-            <li>[[<code class="language-scheme">(car (cons a l))</code>]] = [[a]], et</li>
-            <li>[[<code class="language-scheme">(cdr (cons a l))</code>]] = [[l]].</li>
+            <li>[[<code class="language-scheme">(cons a l)</code>]] = ([[<code>a</code>]] . [[<code>l</code>]]), et </li>
+            <li>[[<code class="language-scheme">(car (cons a l))</code>]] = [[<code>a</code>]], et</li>
+            <li>[[<code class="language-scheme">(cdr (cons a l))</code>]] = [[<code>l</code>]].</li>
         </ul>
 
         <p class="note">Remarque: "A cons cell is composed of two pointers; the car operation extracts the first
@@ -432,6 +432,8 @@
                     alt="Diagramme box-and-pointer pour l'expression (cons 1 (cons 2 3))" />
             </div>
         </div>
+        <br />
+        <p class="note">Ces images ont étés crées avec le bibliothèque <a href="https://docs.racket-lang.org/sdraw/index.html" target="_blank">sdraw</a> de Racket</p>
     </section>
 
     <section class="slide">
@@ -508,7 +510,7 @@
 
         <pre class="input next"><code class="language-scheme">(cond ('trucmuche 3)
       (else 4))</code></pre>
-        <pre class="output next"><code class="language-">1/2</code></pre>
+        <pre class="output next"><code class="language-">3</code></pre>
     </section>
 
     <div class="progress"></div>
