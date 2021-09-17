@@ -80,9 +80,9 @@
         <h2>Chapitre 07: Accumulateurs, processus itératifs</h2>
         <p>Idée de base : Un accumulateur est un argument supplémentaire, 
             lié à des résultats intermédiaires à mémoriser.</p>
-        <p>L’exploitation de la définition</p>
+        <p>L'exploitation de la définition</p>
         <pre class=""><code class="language-scheme">(define fact (lambda (n) (if (zero? n) 1 (* n (fact (- n 1))))))</code></pre>
-        <p>crée le processus de gauche, alors que l’associativité de la multiplication permettrait 
+        <p>crée le processus de gauche, alors que l'associativité de la multiplication permettrait 
             celui de droite, plus simple :</p>
             
         <sub>
@@ -113,7 +113,7 @@
     </section>
 
     <section class="slide">
-        <p>L’intérêt du processus</p>
+        <p>L'intérêt du processus</p>
 
         <pre class=""><code class="language-scheme">(* 1 (fact 4))
 (* 4 (fact 3))
@@ -125,7 +125,7 @@
         <p>
             est que chaque état est caractérisé par deux paramètres seulement. On
             peut générer un tel processus très simplement, en faisant de ces
-            paramètres les arguments d’une fonction <code>fact-a</code> :
+            paramètres les arguments d'une fonction <code>fact-a</code> :
         </p>
 
         <pre class=""><code class="language-scheme">(fact-a 4 1)
@@ -160,9 +160,9 @@
     <section class="slide">
         <p>Variante :</p>
 
-        On observe qu’au cours de l’exécution l’accumulateur a pour valeur un
-        produit partiel, tel $4 \times 3$ ou $4 \times 3 \times 2$ (si on calcule 4!). Rien n’empêche
-        d’utiliser plutôt des produits partiels du type $1 \times 2$ ou $1 \times 2 \times 3$.
+        On observe qu'au cours de l'exécution l'accumulateur a pour valeur un
+        produit partiel, tel $4 \times 3$ ou $4 \times 3 \times 2$ (si on calcule 4!). Rien n'empêche
+        d'utiliser plutôt des produits partiels du type $1 \times 2$ ou $1 \times 2 \times 3$.
         On définit <code class="language-scheme">(fact-b n i b)</code> par la spécification suivante :
 
         <p class="specification">
@@ -270,6 +270,119 @@
         <pre class="output next"><code class="language-">150</code></pre>
     </section>
 
+    <section class="slide">
+        <h3>Exemple avec exploration superficielle I</h3>
+        
+        <sub>
+            <pre class=""><code class="language-scheme">(define reverse
+  (lambda (u)
+    (if (null? u)
+        '()
+         (append (reverse (cdr u))
+                 (list (car u))))))</code></pre>
+            
+            <pre class="input next"><code class="language-scheme">&gt; (reverse '(0 1 2))</code></pre>
+            <pre class="next"><code class="language-scheme">(append (reverse '(1 2)) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(append (append (reverse '(2)) '(1)) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(append (append (append (reverse '()) '(2)) '(1)) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(append (append (append '() '(2)) '(1)) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(append (append '(2) '(1)) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(append '(2 1)) '(0))</code></pre>
+            <pre class="output next"><code class="language-scheme">(2 1 0)</code></pre>
+        </sub>
+
+        <br />
+        <p class="next">Temps d'exécution quadratique</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemple avec exploration superficielle II</h3>
+        
+        <sub>
+            <pre class=""><code class="language-scheme">(define reverse-a
+  (lambda (u a)
+    (if (null? u)
+        a
+        (reverse-a (cdr u) (cons (car u) a)))))</code></pre>
+            
+            <br />
+            <p>Temps d'exéecution linéaire, processus itératif</p>
+            <br />
+
+            <pre class="input next"><code class="language-scheme">&gt; (reverse-a '(0 1 2) '())</code></pre>
+            <pre class="next"><code class="language-scheme">(reverse-a '(1 2) '(0))</code></pre>
+            <pre class="next"><code class="language-scheme">(reverse-a '(2) '(1 0))</code></pre>
+            <pre class="next"><code class="language-scheme">(reverse-a '() '(2 1 0))</code></pre>
+            <pre class="output next"><code class="language-scheme">(2 1 0)</code></pre>
+        </sub>
+
+        <br />
+        <p class="specification next">
+            [[<code>(append (reverse u) a)</code>]] = [[<code>(reverse-a u a)</code>]]
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemple, récursivité non structurelle Ie</h3>
+        
+        <sub>
+            <pre class=""><code class="language-scheme">(define flat-l
+  (lambda (l)
+    (cond
+      ((null? l) '())
+      ((atom? (car l))
+        (if (null? (car l)) (flat-l (cdr l)) (cons (car l) (flat-l (cdr l)))))
+      ((list? (car l)) (append (flat-l (car l)) (flat-l (cdr l)))))))
+
+(define flat-a
+  (lambda (l a)
+  (cond
+    ((null? l) a)
+    ((atom? (car l))
+      (if (null? (car l))
+          (flat-a (cdr l) a)
+          (cons (car l) (flat-a (cdr l) a))))
+    ((list? (car l)) (flat-a (car l) (flat-a (cdr l) a))))))</code></pre>
+        </sub>
+
+        <br />
+        <p class="specification next">
+            [[<code>(append (flat-l l) a)</code>]] = [[<code>(flat-a l a)</code>]]
+        </p>
+
+        <p>Gain de temps et d'espace, processus non itératif.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemple avec exploration profonde</h3>
+        
+        <sub>
+            <pre class=""><code class="language-scheme">(define M (lambda (x) (if (> x 100) (- x 10) (M (M (+ x 11))))))</code></pre>
+        
+            <br />
+            <p>On peut démontrer que la valeur de <code>(M x)</code> existe
+                quelle que soit la valeur de l'entier (relatif) <code>x</code>.</p>
+
+            <p>On peut aussi prouver que le graphe de <code>M</code> coïncide avec celui de <code>M91</code> :</p>
+
+            <pre class=""><code class="language-scheme">(define M91 (lambda (x) (if (> x 100) (- x 10) 91)))</code></pre>
+            <br />
+        </sub>
+            <p class="specification">
+                [[<code>(M-c x 0)</code>]] = [[<code>x</code>]] ; <br />
+                [[<code>(M-c x 1)</code>]] = [[<code>(M x)</code>]] ; <br />
+                [[<code>(M-c x 2)</code>]] = [[<code>(M (M x))</code>]] ; <br />
+                [[<code>(M-c x 3)</code>]] = [[<code>(M (M (M x)))</code>]] ; <br />
+                ...</p>
+        <sub>
+            <pre class=""><code class="language-scheme">(define M-c
+  (lambda (x c)
+    (cond ((= c 0) x)
+          ((> x 100) (M-c (- x 10) (- c 1)))
+          (else (M-c (+ x 11) (+ c 1))))))</code></pre>
+        </sub>
+    </section>
+    
     <div class="progress"></div>
 
     <footer class="badge">
