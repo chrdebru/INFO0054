@@ -66,6 +66,28 @@
             padding: 5px; 
             color: red;
         }
+
+        .slide table {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide table tr td {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide th:first-child, .slide td:first-child {
+            padding-left: 0px;
+        }
+
+        .slide th:last-child, .slide td:last-child {
+            padding-right: 0px;
+        }
     </style>
 </head>
 
@@ -175,7 +197,7 @@
             <p>On peut écrire :</p>
             <pre class=""><code class="language-scheme">(define fact-b
   (lambda (n i b)
-    (if (> i n) b (fact-b n (+ i 1) (* b i)))))
+    (if (&gt; i n) b (fact-b n (+ i 1) (* b i)))))
 
 (define fact
   (lambda (n) (fact-b n 1 1)))</code></pre>
@@ -323,7 +345,7 @@
     </section>
 
     <section class="slide">
-        <h3>Exemple, récursivité non structurelle Ie</h3>
+        <h3>Exemple avec exploration profonde</h3>
         
         <sub>
             <pre class=""><code class="language-scheme">(define flat-l
@@ -354,10 +376,10 @@
     </section>
 
     <section class="slide">
-        <h3>Exemple avec exploration profonde</h3>
+        <h3>Exemple, récursivité non structurelle I</h3>
         
         <sub>
-            <pre class=""><code class="language-scheme">(define M (lambda (x) (if (> x 100) (- x 10) (M (M (+ x 11))))))</code></pre>
+            <pre class=""><code class="language-scheme">(define M (lambda (x) (if (&gt; x 100) (- x 10) (M (M (+ x 11))))))</code></pre>
         
             <br />
             <p>On peut démontrer que la valeur de <code>(M x)</code> existe
@@ -365,7 +387,7 @@
 
             <p>On peut aussi prouver que le graphe de <code>M</code> coïncide avec celui de <code>M91</code> :</p>
 
-            <pre class=""><code class="language-scheme">(define M91 (lambda (x) (if (> x 100) (- x 10) 91)))</code></pre>
+            <pre class=""><code class="language-scheme">(define M91 (lambda (x) (if (&gt; x 100) (- x 10) 91)))</code></pre>
             <br />
         </sub>
             <p class="specification">
@@ -378,11 +400,444 @@
             <pre class=""><code class="language-scheme">(define M-c
   (lambda (x c)
     (cond ((= c 0) x)
-          ((> x 100) (M-c (- x 10) (- c 1)))
+          ((&gt; x 100) (M-c (- x 10) (- c 1)))
           (else (M-c (+ x 11) (+ c 1))))))</code></pre>
         </sub>
     </section>
+
+    <section class="slide">
+        <h3>Exemple, récursivité non structurelle II</h3>
+        
+        <sub>
+            <pre class=""><code class="language-scheme">(define ack   ;; Fonction totale sur NxN
+  (lambda (m n)
+    (cond ((zero? m) (+ n 1))
+          ((zero? n) (ack (- m 1) 1))
+          (else (ack (- m 1) (ack m (- n 1)))))))
+      
+(define acl
+  (lambda (l)
+    (cond ((null? (cdr l)) (car l))
+          ((zero? (cadr l)) (acl (cons (+ (car l) 1) (cddr l))))
+          ((zero? (car l)) (acl (cons 1 (cons (- (cadr l) 1) (cddr l)))))
+          (else (acl (cons (- (car l) 1) (cons (cadr l) (cons (- (cadr l) 1) (cddr l)))))))))</code></pre>
+        
+        </sub>
+        
+        <br />
+        
+        <p class="specification">
+            [[<code>(acl '(n))</code>]] = [[<code>n</code>]] ; <br />
+            [[<code>(acl '(n m))</code>]] = [[<code>(ack m n)</code>]] ; <br />
+            [[<code>(acl '(n m u))</code>]] = [[<code>(ack u (ack m n))</code>]] ; <br />
+            [[<code>(acl '(n m u v))</code>]] = [[<code>(ack v (ack u (ack m n)))</code>]] ; <br /> 
+            ...
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS I</h3>
+        
+        <p>Reconsidérons deux états homologues des processus de calcul associés aux 
+            évaluations des formes <code class="language-scheme">(fact 4)</code>
+            et <code class="language-scheme">(fact-a 4 1)</code>, soient</p>
+        <table>
+            <tr>
+                <td><code class="language-scheme">(* 4 (* 3 (fact 2)))</code></td>
+                <td><code class="language-scheme">(fact-a 2 12)</code></td>
+            </tr>
+        </table>
+
+        <p>On a trois paires de constituants homologues :</p>
+
+        <div>
+            <table>
+                <tr>
+                    <td><code class="language-scheme">fact</code></td>
+                    <td><code class="language-scheme">fact-a</code></td>
+                </tr>
+                <tr>
+                    <td><code class="language-scheme">2</code></td>
+                    <td><code class="language-scheme">2</code></td>
+                </tr>
+                <tr>
+                    <td><code class="language-scheme">(* 4 (* 3 ...))</code></td>
+                    <td><code class="language-scheme">12</code></td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            Il est plus économique de mémoriser le nombre <code>12</code> que la fonction 
+            <code class="language-scheme">(* 4 (* 3 ...))</code> ou, plus exactement, l'expression
+            <code class="language-scheme">(lambda (k) (* 4 (* 3 k)))</code> .
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS II</h3>
+        
+        <p>On peut cependant utiliser un argument fonctionnel, 
+            et on le devrait si la multiplication n'était pas associative :</p>
+
+        <pre class=""><code class="language-scheme">(define fact-c
+  (lambda (n c)
+    (if (zero? n)
+        (c 1)
+        (fact-c (- n 1)
+                (lambda (k) (c (* n k)))))))
+
+(define fact
+  (lambda (n) (fact-c n (lambda (k) k))))</code></pre>
+
+        <p class="specification">
+            Si $n$ est un naturel et si $c$ est une fonction de $\mathbb{N}$ dans $D$, <br />
+            alors [[<code>(fact-c n c )</code>]] = $c(n!)$.
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS III</h3>
+        
+        <p>On voit que l'associativité n'est pas utilisée :</p>
+
+        <pre class=""><code class="language-scheme">(fact-c 4 (lambda (k) k))
+(fact-c 3 (lambda (k) ((lambda (k) k) (* 4 k))))
+(fact-c 3 (lambda (k) (* 4 k)))
+(fact-c 2 (lambda (k) ((lambda (k) (* 4 k)) (* 3 k))))
+(fact-c 2 (lambda (k) (* 4 (* 3 k))))
+...
+(fact-c 0 (lambda (k) (* 4 (* 3 (* 2 (* 1 k))))))
+((lambda (k) (* 4 (* 3 (* 2 (* 1 k))))) 1)
+(* 4 (* 3 (* 2 (* 1 1))))
+24</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS IV</h3>
+        
+        <p>Remarque. Scheme n'effectue les réductions qu'à la fin du processus. 
+            La dernière étape n'est donc pas l'évaluation de</p>
+
+        <pre class=""><code class="language-scheme">((lambda (k) (* 4 (* 3 (* 2 (* 1 k))))) 1)</code></pre>
+
+        <p>mais celle de</p>
+
+        <pre class=""><code class="language-scheme">((lambda (k)
+   ((lambda (k)
+      ((lambda (k)
+         ((lambda (k)
+            ((lambda (k) k) (* 4 k)))
+          (* 3 k)))
+       (* 2 k)))
+    (* 1 k)))
+1)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS V</h3>
+        
+        <p>L'argument fonctionnel auxiliaire <code>c</code> est une <em>continuation</em>. Cette fonction, appliquée à un
+            résultat intermédiaire du calcul en cours, fournit le résultat final.</p>
+
+        <p>Dans le cas de <code>fact-c</code>, l'exécution construit itérativement une fonction de plus en plus complexe, représentant
+            l'enchaînement des multiplications à faire. A chaque étape, l'argument continuation est transformé en une
+            fonction impliquant une multiplication supplémentaire ; cette fonction est l'argument de l'appel suivant. Les
+            calculs numériques n'ont lieu que quand l'enchaînement complet des multiplications aété formé. Cette
+            technique est le <em>Continuation-Passing Style</em> (CPS). Elle ressemble à la technique de séparation fonctionnelle vue
+            précédemment.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS VI</h3>
     
+        <p>Produit de liste : $l \to \prod_{x \in l} x$.</p>
+
+        <sub><pre class=""><code class="language-scheme">(define pl 
+  (lambda (l) 
+    (cond ((null? l) 1)
+          ((zero? (car l)) 0)
+          (#t (* (car l) (pl (cdr l)))))))</code></pre></sub>
+
+        <br />
+        
+        <p class="next">Si un facteur est nul, comment éviter toutes les multiplications ? 
+            Séparation fonctionnelle, ou encore CPS :</p>
+
+        <sub><pre class="next"><code class="language-scheme">(define pl-c
+  (lambda (l c)
+    (cond ((null? l) (c 1))
+          ((zero? (car l)) 0)
+          (#t (pl-c (cdr l) (lambda (k) (c (* (car l) k)))))))) 
+
+(define pl (lambda (l) (pl-c l (lambda (k) k))))</code></pre></sub>
+
+        <br />
+
+        <p class="next">On comparera les couples (<code>pl-c</code>,<code>pl</code>) et (<code>p2</code>,<code>pl2</code>), tr. 86.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS VII</h3>
+    
+        <p>On peut remplacer la continuation par un argument non fonctionnel. 
+            Pour <code>pl</code>, cela revient à tester
+            l'absence de facteur nul avant d'opérer les multiplications.</p>
+
+        <pre class=""><code class="language-scheme">(define pl-l
+  (lambda (l a) ;; la liste a ne comporte pas de 0
+    (cond ((null? l) (p a))
+          ((zero? (car l)) 0)
+          (else (pl-l (cdr l) (cons (car l) a))))))
+
+(define pl (lambda (l) (pl-l l '())))
+
+;; p est une procedure calculant le produit
+;; d'une liste dont aucun facteur n'est nul.</code></pre>
+
+        <br />
+
+        <p class="next">Inconvénient : double parcours de liste si aucun facteur nul n'est présent.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS VIII</h3>
+    
+        <p>Double comptage – rappel. La séparation fonctionnelle permet d'éviter efficacement 
+            le double parcours de la liste :</p>
+
+        <sub><pre class=""><code class="language-scheme">(define c2
+  (lambda (l s c)
+    (if (null? l)
+        c
+        (if (eq? (car l) s)
+            (c2 (cdr l)
+                s
+                (lambda (u) (c (cons (1+ (car u)) (cdr u)))))
+            (c2 (cdr l)
+                s
+                (lambda (u) (c (cons (car u) (1+ (cdr u))))))))))
+
+(define id (lambda (v) v))
+
+(define count2 (lambda (l s) ((c2 l s id) '(0 . 0))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS IX</h3>
+    
+        <p>La solution en CPS est semblable :</p>
+
+        <sub><pre class=""><code class="language-scheme">(define c3
+  (lambda (l s c)
+    (if (null? l)
+        (c '(0 . 0))
+        (if (eq? (car l) s)
+            (c3 (cdr l)
+                s
+                (lambda (u) (c (cons (1+ (car u)) (cdr u)))))
+            (c3 (cdr l)
+                s
+                (lambda (u) (c (cons (car u) (1+ (cdr u))))))))))
+                
+(define count3 (lambda (l s) (c3 l s id)))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS X</h3>
+    
+        <p>Une variante permet l'économie des opérations sur les paires :</p>
+
+        <sub><pre class=""><code class="language-scheme">(define c3
+  (lambda (l s c)
+    (if (null? l)
+        (c 0 0)
+        (if (eq? (car l) s)
+            (c3 (cdr l)
+                s
+                (lambda (u v) (c (1+ u) v)))
+            (c3 (cdr l)
+                s
+                (lambda (u v) (c u (1+ v))))))))
+
+(define count3 (lambda (l s) (c3 l s cons)))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS XI</h3>
+    
+        <p>Spécification :</p>
+
+        <p class="specification">
+            Si $s$ est un symbole, <br />
+            si $l$ est une liste de symboles <br />
+            et si $c$ est une fonction de $\mathbb{N} \to \mathbb{N}$ dans $D$, <br />
+            alors <code>(c3 l s c)</code> vaut $c(a,b)$, <br />
+            où $a$ est le nombre d'occurrences de $s$ dans $l$ et <br />
+            où $b$ est le nombre d'occurrences de symboles distincts de $s$ dans $l$.
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS XII</h3>
+    
+        <p>L'argument fonctionnel évolue comme suit.</p>
+        <p>Si sa valeur “avant” un appel récursif est celle de <code>c</code>, soit</p>
+        
+        <pre class=""><code class="language-scheme">(lambda (x y) (c x y))</code></pre>
+        
+        <p>sa “nouvelle” valeur sera celle d'une des expressions</p>
+        
+        <pre class=""><code class="language-scheme">(lambda (x y) (c (1+ x) y))
+(lambda (x y) (c x (1+ y)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Programmation CPS XIII</h3>
+    
+        <p>On peut remplacer l'argument fonctionnel par deux arguments numériques. Cela donne :</p>
+
+        <pre class=""><code class="language-scheme">(define c4
+  (lambda (l s a1 a2)
+    (if (null? l)
+        (cons a1 a2)
+        (if (eq? (car l) s)
+            (c4 (cdr l) s (1+ a1) a2)
+            (c4 (cdr l) s a1 (1+ a2))))))
+
+(define count4 (lambda (l s) (c4 l s 0 0)))</code></pre>
+
+        <p>Cette solution est simple et optimale.</p>
+
+        <p>On voit que la séparation fonctionnelle et le CPS sont des techniques utiles, donnant lieu 
+            à des solutions efficaces.</p>
+            
+        <p>Parfois, le remplacement de l'argument fonctionnel par un ou plusieurs 
+            accumulateur(s) améliore encore le programme.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Un schéma accumulant I</h3>
+    
+        <p>Si à toute liste de naturels la fonction $h$ associe un naturel, 
+            on définit la fonction $gib$ (pour “generalized Fibonacci”) par</p>
+
+        $$gib(n,h) = h([gib(n - 1,h),...,gib(0,h)])$$
+
+        <p>Pour une fonction $h$ appropriée, on retrouve Fibonacci :</p>     
+
+        <pre class=""><code class="language-scheme">(define hfib
+  (lambda (l)
+    (cond ((null? l) 0)
+          ((null? (cdr l)) 1)
+          (else (+ (car l) (cadr l))))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (hfib '(8 5 3 2 1 1 0))</code></pre>
+        <pre class="output next"><code class="language-scheme">(hfib '(8 5 3 2 1 1 0))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Un schéma accumulant II</h3>
+
+        <p>Cas général :</p>
+
+        <pre class=""><code class="language-scheme">(define rev-enum       ;; 5 -&gt; (5 4 3 2 1 0)
+  (lambda (n)
+    (if (&lt; n 0) '() (cons n (rev-enum (- n 1))))))</code></pre>
+
+        <p class="next">on peut programmer <code>gib</code> en utilisant <code>map</code> :</p>
+
+        <pre class="next"><code class="language-scheme">(define gib0
+  (lambda (n h)
+    (h (map (lambda (i) (gib0 i h))
+            (rev-enum (- n 1))))))</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (gib0 12 hfib)</code></pre>
+        <pre class="output next"><code class="language-scheme">144</code></pre>
+
+        <p class="next">C'est correct, mais extrêmement inefficace.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Un schéma accumulant III</h3>
+
+        <p>En utilisant une fonction auxiliaire, on obtient :</p>
+
+        <sub><pre class=""><code class="language-scheme">(define gib1
+  (lambda (n h) (h (gib1* n h))))
+
+(define gib1*
+  (lambda (n h)
+    (if (= n 0)
+        '()
+        (cons (gib1 (- n 1) h) (gib1* (- n 1) h)))))</code></pre></sub>
+
+        <p class="next">Cette solution reste inefficace car l'évaluation du premier argument du cons 
+            implique la (ré)évaluation du second. Plus précisément, si la valeur du second argument 
+            est $r$, la valeur du premier argument est $h(r)$.</p>
+
+        <sub>
+            <pre class="input next"><code class="language-scheme">&gt; (gib1 10 hfib)</code></pre>
+            <pre class="output next"><code class="language-scheme">55</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (gib1* 10 hfib)</code></pre>
+            <pre class="output next"><code class="language-scheme">(34 21 13 8 5 3 2 1 1 0)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (hfib '(34 21 13 8 5 3 2 1 1 0))</code></pre>
+            <pre class="output next"><code class="language-scheme">55</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Un schéma accumulant IV</h3>
+
+        <p>La variante suivante évite ce gaspillage :</p>
+
+        <sub><pre class=""><code class="language-scheme">(define gib2 (lambda (n h) (h (gib2* n h))))
+(define gib2*
+  (lambda (n h)
+    (if (= n 0)
+        '()
+        ((lambda (rec) (cons (h rec) rec)) (gib2* (- n 1) h)))))</code></pre></sub>
+
+        <p class="next">La fonction auxiliaire s'écrit aussi (variante syntaxique vue plus loin)</p>
+        
+        <sub><pre class="next"><code class="language-scheme">(define gib2*
+  (lambda (n h)
+    (if (= n 0)
+        '()
+        (let ((rec (gib2* (- n 1) h))) (cons (h rec) rec)))))</code></pre></sub>
+        
+        <p class="next">On a par exemple</p>
+
+        <sub>
+            <pre class="input next"><code class="language-scheme">&gt; (gib2* 12 hfib)</code></pre>
+            <pre class="output next"><code class="language-scheme">(89 55 34 21 13 8 5 3 2 1 1 0)</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Un schéma accumulant V</h3>
+
+        <p>Version accumulante et itérative :</p>
+
+        <pre class=""><code class="language-scheme">(define gib (lambda (n h) (h (gib-a n h '()))))
+(define gib-a
+  (lambda (n h l)
+    (if (= n 0) l (gib-a (- n 1) h (cons (h l) l)))))</code></pre>
+
+        <p class="specification next">
+            Si <code>n</code>, <code>h</code> et <code>l</code> ont pour valeurs respectives <br />
+            $n$, $h$ et $[gib(i - 1,h),...,gib(0,h)]$, <br />
+            alors <code>(gib-a n h l)</code> a pour valeur <br />
+            $[gib(n + i - 1,h),...,gib(0,h)]$. <br />
+            En particulier, <code>(gib-a n h '())</code> a pour valeur $[gib(n - 1,h),...,gib(0,h)]$.
+        </p>
+
+        <pre class="input next"><code class="language-scheme">&gt; (gib-a 4 hfib '(21 13 8 5 3 2 1 1 0))</code></pre>
+        <pre class="output next"><code class="language-scheme">(144 89 55 34 21 13 85 32 1 1 0)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (gib 12 hfib)</code></pre>
+        <pre class="output next"><code class="language-scheme">144</code></pre>
+    </section>
+
     <div class="progress"></div>
 
     <footer class="badge">
