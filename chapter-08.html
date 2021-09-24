@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 08: Expressions symboliques</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        @page {
+           size: 1024px 768px;
+           border: 1px solid black;
+        }
+        
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px; 
+            color: red;
+        }
+
+        .slide table {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide table tr td {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide th:first-child, .slide td:first-child {
+            padding-left: 0px;
+        }
+
+        .slide th:last-child, .slide td:last-child {
+            padding-right: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 08: Expressions symboliques</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 08: Expressions symboliques</h2>
+        <h3>Représentation des listen en mémoire</h3>
+        <p>
+            <em>Principe</em>. La représentation en mémoire de la valeur de 
+            <code>(cons exp1 exp2)</code> est un couple de pointeurs 
+            vers les représentations des valeurs de <code>exp1</code> et
+            <code>exp2</code>. Dans le cas des listes, <code>exp2</code> 
+            est une liste, mais le cas où <code>exp2</code> n'est pas une
+            liste est admis aussi. 
+        </p>
+        <p>
+            <em>Extension</em>. Une expression symbolique est un 
+            atome ou une paire formée
+            d'expressions symboliques.
+        </p>
+        <p>
+            <em>Notation pointée</em>. Le point (entouré d'espaces) 
+            et les parenthèses représentent l'appariement.
+        </p>
+
+        <figure>
+            <blockquote>
+                <p class="note">
+                    In general, the rule for printing a pair is as follows: use the dot notation unless the dot is immediately followed by
+                    an open parenthesis. In that case, remove the dot, the open parenthesis, and the matching close parenthesis. Thus, 
+                    <code>'(0 . (1 . 2))</code> becomes <code>'(0 1 . 2)</code>, 
+                    and <code>'(1 . (2 . (3 . ())))</code> becomes <code>'(1 2 3)</code>.
+                </p>
+            </blockquote>
+            <figcaption><a href="https://docs.racket-lang.org/guide/Pairs__Lists__and_Racket_Syntax.html" target="_blank">2.4 Pairs, Lists, and Racket Syntax</a></figcaption>
+        </figure>
+    </section>
+
+    <section class="slide">
+        <h2>Chapitre 08: Expressions symboliques</h2>
+        <h3>Représentation des listen en mémoire</h3>
+
+        <sub>
+            <pre class="input next"><code class="language-scheme">&gt; 'a                       ;; -> a</code></pre>
+            <pre class="output next"><code class="language-">a</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (cons 'a 'b)             ;; -> (a . b)</code></pre>
+            <pre class="output next"><code class="language-">(a . b)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (cons 'a '())            ;; -> (a . ())</code></pre>
+            <pre class="output next"><code class="language-">(a)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a)                ;; -> (a . ())</code></pre>
+            <pre class="output next"><code class="language-">(a)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a 'b)             ;; -> (a . (b . ()))</code></pre>
+            <pre class="output next"><code class="language-">(a b)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a (cons 'b 'c))   ;; -> '(a . ((b . c) . ()))</code></pre>
+            <pre class="output next"><code class="language-">(a (b . c))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; '(a b c d)               ;; -> (a . (b . (c . (d . ()))))</code></pre>
+            <pre class="output next"><code class="language-">(a b c d)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; '((a b) (c))             ;; -> ((a . (b . ())) . ((c . ()) . ()))</code></pre>
+            <pre class="output next"><code class="language-">((a b) (c))</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Expressions symboliques représentées par des arbres binaires</h3>
+        <p>Une expression symbolique est un arbre binaire
+            dont les feuilles sont des atomes.</p>
+        
+        <pre class="next"><code class="language-">(a . ((b . (c . (d . w))) . (((e . (f . x)) . (g . y)) . z)))</code></pre>
+        
+        <pre class="next"><code class="language-scheme">(cons 'a
+      (cons (cons 'b (cons 'c (cons 'd 'w)))
+            (cons (cons (cons 'e (cons 'f 'x))
+                        (cons 'g 'y))
+                  'z)))</code></pre>
+
+        <img class="place bottom right next" src="./chapter-08/tree-1.png" width="40%" alt="Représentation arborescente de l'expression symbolique (a . ((b . (c . (d . w))) . (((e . (f . x)) . (g . y)) . z)))." />
+    </section>
+
+    <section class="slide">
+        <h3>Notation pointée et notation usuelle</h3>
+
+        <p>La notation pointée met en évidence la structure <br />d'<em>arbre binaire décoré</em> des expressions symboliques.</p>
+        <p>Chaque nœud a 0 (feuille) ou 2 (noeud interne) fils, <br />auxquels on accède par <code>car</code> et <code>cdr</code>.</p>
+        <p>Chaque feuille est (étiquetée par) un atome.</p>
+        
+        <pre class="next"><code class="language-">a</code></pre>
+        <pre class="next"><code class="language-">()</code></pre>
+        <pre class="next"><code class="language-">(b . 3)</code></pre>
+        <pre class="next"><code class="language-">((a . b) . c)</code></pre>
+        <pre class="next"><code class="language-">((7 . g) . (#f . (y . (z . ()))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Notation pointée et notation usuelle</h3>
+
+        <p>Les listes sont des expressions symboliques particulières ;
+            chaque point est suivi d'une parenthèse ouverte :</p>
+
+        
+        <pre class=""><code class="language-">()          ->    ()
+(0)         ->    (0 . ())
+(0 1)       ->    (0 . (1 . ()))
+(0 1 2)     ->    (0 . (1 . (2 . ())))
+((0 1) 2)   ->    ((0 . (1 . ())) . (2 . ()))</code></pre>
+
+        <p>Les constructeur et accesseurs et reconnaisseur sont <code>cons</code>, <code>car</code>, <code>cdr</code>, <code>pair?</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Notation pointée et notation usuelle</h3>
+
+        <p>
+            Tout point suivi d'une parenthèse ouverte est supprimé, ainsi que la
+            parenthèse ouverte et la parenthèse fermée correspondante.
+        </p>
+        <p>L'ordre des suppressions est quelconque.</p>
+        <p>Un point non suivi d'une parenthèse ouverte n'est pas supprimable !</p>
+        
+        <sub><pre class="next"><code class="language-">((0 . (1 . ())) . (2 . ()))
+((0 . (1 . ())) . (2     ))
+((0    1 . () ) . (2     ))
+((0    1 . () )    2      )
+((0    1      )    2      )</code></pre></sub>
+
+        <sub><pre class="next"><code class="language-">((a . (b . ())) . ((c . (d . ())) . ()))
+((a . (b . ())) . ((c . (d . ()))))
+((a . (b . ())) . ((c . (d))))
+((a . (b . ())) . ((c d)))
+((a . (b . ())) (c d))
+((a . (b)) (c d))
+((a b) (c d))</code></pre></sub>
+
+        <sub><pre class="next"><code class="language-">((a . b) . (c . d))
+((a . b) c . d)</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Représentations des listes</h3>
+
+        <p>
+            Une liste se représente conceptuellement par un arbre (quelconque). En
+            machine, on représente plutôt (par un arbre binaire) l'expression
+            symbolique équivalente (en fait, égale).
+        </p>
+
+        <p>Représentations de la liste <code>(a (b c d) ((e f) g))</code></p>
+        
+        <div class="columns two">
+            <div>
+                <p>Conceptuelle : </p>
+                <img class="" src="./chapter-08/tree-2.png" width="70%" alt="Représentation conceptuelle de la liste (a (b c d) ((e f) g))" />
+            </div>
+            <div>
+                <p>En machine :</p>
+                <img class="" src="./chapter-08/tree-3.png" width="70%" alt="Représentation en mémoire de la liste (a (b c d) ((e f) g))" />
+            </div>
+        </div>
+
+        <p>Remarque. L'information attachée à un noeud interne se déduit de celle attachée à ses
+            descendants ; seule l'information attachée aux feuilles est explicitement représentée</p>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>

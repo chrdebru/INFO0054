@@ -323,13 +323,17 @@
             <pre class=""><code class="language-scheme">(define fib-a
   (lambda (n a b)
     (if (zero? n)
-      a
-      (fib-a (- n 1) b (+ a b)))))</code></pre>
+        a
+        (fib-a (- n 1) 
+               b 
+               (+ a b)))))</code></pre>
             <pre class=""><code class="language-scheme">(define fib
   (lambda (n)
     (fib-a n 0 1)))</code></pre>
         </div>
         
+        <br />
+
         <p class="specification">Si <code>n</code>, <code>a</code> et <code>b</code> ont pour valeurs respectives $n$, $f_i$ et
             $f_{i+1}$, alors <code>(fib-a n a b)</code> a pour valeur $f_{n+i}$. 
             En particulier, <code>(fib-a n 0 1)</code> a pour valeur $f_n$.</p>
