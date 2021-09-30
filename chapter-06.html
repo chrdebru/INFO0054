@@ -321,7 +321,7 @@
             <div>
                 <p class="next">Les fonctions <code>G</code>, <code>H</code> et <code>K</code> sont supposées déjà définies ; <code>u</code> représente une suite de 0, 1 ou plusieurs arguments.</p>
 
-                <p class="next">Calculer <code class="language-scheme">(F () u)</code> n'implique pas d'appel récursif.</p>
+                <p class="next">Calculer <code class="language-scheme">(F '() u)</code> n'implique pas d'appel récursif.</p>
 
                 <p class="next">Calculer <code class="language-scheme">(F l u)</code> implique l'appel <code class="language-scheme">(F (cdr l) (K l u))</code> si <code>l</code> n'est pas vide.</p>
             </div>
@@ -845,7 +845,7 @@ given: emptyfunction</code></pre>
         <p>On a séparé</p>
         <ul>
             <li>le <em>calcul</em> de la fonction $fact_p$</li>
-            <li>l'<em>application</em> de cette fonction è un argument. On a $fact(n) = fact_p(n)$ si $p \gt n$; on choisit $p = n+1$.</li>
+            <li>l'<em>application</em> de cette fonction à un argument. On a $fact(n) = fact_p(n)$ si $p \gt n$; on choisit $p = n+1$.</li>
         </ul>
     
         <p>Cette technique de séparation fonctionnelle n'apporte rien dans le cas très simple de la fonction factorielle
