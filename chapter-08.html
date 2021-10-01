@@ -133,25 +133,24 @@
     </section>
 
     <section class="slide">
-        <h2>Chapitre 08: Expressions symboliques</h2>
         <h3>Représentation des listen en mémoire</h3>
 
         <sub>
-            <pre class="input next"><code class="language-scheme">&gt; 'a                       ;; -> a</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; 'a                       ;; -&gt; a</code></pre>
             <pre class="output next"><code class="language-">a</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; (cons 'a 'b)             ;; -> (a . b)</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (cons 'a 'b)             ;; -&gt; (a . b)</code></pre>
             <pre class="output next"><code class="language-">(a . b)</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; (cons 'a '())            ;; -> (a . ())</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (cons 'a '())            ;; -&gt; (a . ())</code></pre>
             <pre class="output next"><code class="language-">(a)</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; (list 'a)                ;; -> (a . ())</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a)                ;; -&gt; (a . ())</code></pre>
             <pre class="output next"><code class="language-">(a)</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; (list 'a 'b)             ;; -> (a . (b . ()))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a 'b)             ;; -&gt; (a . (b . ()))</code></pre>
             <pre class="output next"><code class="language-">(a b)</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; (list 'a (cons 'b 'c))   ;; -> '(a . ((b . c) . ()))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (list 'a (cons 'b 'c))   ;; -&gt; '(a . ((b . c) . ()))</code></pre>
             <pre class="output next"><code class="language-">(a (b . c))</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; '(a b c d)               ;; -> (a . (b . (c . (d . ()))))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; '(a b c d)               ;; -&gt; (a . (b . (c . (d . ()))))</code></pre>
             <pre class="output next"><code class="language-">(a b c d)</code></pre>
-            <pre class="input next"><code class="language-scheme">&gt; '((a b) (c))             ;; -> ((a . (b . ())) . ((c . ()) . ()))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; '((a b) (c))             ;; -&gt; ((a . (b . ())) . ((c . ()) . ()))</code></pre>
             <pre class="output next"><code class="language-">((a b) (c))</code></pre>
         </sub>
     </section>
@@ -193,11 +192,11 @@
             chaque point est suivi d'une parenthèse ouverte :</p>
 
         
-        <pre class=""><code class="language-">()          ->    ()
-(0)         ->    (0 . ())
-(0 1)       ->    (0 . (1 . ()))
-(0 1 2)     ->    (0 . (1 . (2 . ())))
-((0 1) 2)   ->    ((0 . (1 . ())) . (2 . ()))</code></pre>
+        <pre class=""><code class="language-">()          -&gt;    ()
+(0)         -&gt;    (0 . ())
+(0 1)       -&gt;    (0 . (1 . ()))
+(0 1 2)     -&gt;    (0 . (1 . (2 . ())))
+((0 1) 2)   -&gt;    ((0 . (1 . ())) . (2 . ()))</code></pre>
 
         <p>Les constructeur et accesseurs et reconnaisseur sont <code>cons</code>, <code>car</code>, <code>cdr</code>, <code>pair?</code>.</p>
     </section>
@@ -254,6 +253,302 @@
 
         <p>Remarque. L'information attachée à un noeud interne se déduit de celle attachée à ses
             descendants ; seule l'information attachée aux feuilles est explicitement représentée</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exercise de ce chapitre</h3>
+
+        <p>Créer des fonctions qui traitent la répresentation "machinale" des liste et non la répresentation "conceptuelle".</p>
+
+        <p>Par exemple : <code>(size-con '(1 2 3 4))</code> renvoie 4 car il y 4 elements dans la liste et 
+            <code>(size-mac '(1 2 3 4))</code> renvoie 5 car la liste vide est un des 5 noeuds.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Tangente: <code>atom?</code></h3>
+        
+        <div class="columns two">
+            <div>
+                <p>Dans le passé : </p>
+
+                <p>Tout ce qui n'est pas une paire.</p>
+                
+                <pre class=""><code class="language-scheme">(define (atom? x)
+  (not (pair? x)))</code></pre>
+            </div>
+            <div>
+                <p>Désormais :</p>
+
+                <p>Tout ce qui est ni une paire, ni null.</p>
+
+                <pre class=""><code class="language-scheme">(define (atom? x)
+  (and (not (null? x))
+       (not (pair? x))))</code></pre> 
+            </div>
+        </div>
+        <br />
+        <p>La fonction <code>atom?</code> n'existe plus. Des bibliothèques qui fournissent une implémentation existent, mais renseignez la
+            documentation avant de l'utiliser. Vous pouvez déclarer votre propre implémentation de cette fonction. Votre choix
+            aura, évidemment, une implication pour les schémas. Sauf indiqué autrement, j'utilise "l'implémentation" récente.
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Tangente: <code>atom?</code></h3>
+        
+        <p>Attention : les anciens diapositifs mélangent de temps en temps les deux versions de <code>atom?</code> ! Sur slide 124, par exemple.</p>
+
+        <pre class=""><code class="language-scheme">(define size
+  (lambda (s)
+    (if (atom? s) 1 (+ (size (car s)) (size (cdr s))))))
+
+(define (atom? x) (not (pair? x)))</code></pre> 
+
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4 . 5))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4 . ()))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Tangente: <code>atom?</code></h3>
+        
+        <p>Mais avec l'autre définition de <code>atom?</code> : </p>
+
+        <pre class=""><code class="language-scheme">(define size
+  (lambda (s)
+    (if (atom? s) 1 (+ (size (car s)) (size (cdr s))))))
+
+(define (atom? x) (and (not (null? x)) (not (pair? x))))</code></pre> 
+
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4 . 5))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4 . ()))</code></pre>
+        <pre class="output next"><code class="language-">5</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (size '(1 2 3 4))</code></pre>
+        <pre class="error next"><code class="language-">car: contract violation
+expected: pair?
+given: '()</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Tangente: <code>atom?</code></h3>
+        
+        <p>Moi, <em>personellement</em>, je préfère utilise l'implementation récente de <code>atom?</code> et de adapter la definition de <code>size</code> : </p>
+
+        <pre class=""><code class="language-scheme">;(define size
+;  (lambda (s)
+;    (if (atom? s) 1 (+ (size (car s)) (size (cdr s))))))
+
+(define size
+  (lambda (s)
+    (cond ((null? s) 1)
+          ((atom? s) 1)
+          (else (+ (size (car s)) (size (cdr s)))))))
+
+(define (atom? x) (and (not (null? x)) (not (pair? x))))</code></pre> 
+    </section>
+
+    <section class="slide">
+        <h3>Tangente: <code>atom?</code></h3>
+        
+        <p>Vous pouvez également considerer un schéma utilisant <code>not</code> et <code>pair?</code> : </p>
+
+        <pre class=""><code class="language-scheme">;(define size
+;  (lambda (s)
+;    (if (atom? s) 1 (+ (size (car s)) (size (cdr s))))))
+
+(define size
+  (lambda (s)
+    (if (not (pair? s)) 
+        1 
+        (+ (size (car s)) (size (cdr s))))))
+
+; (define (atom? x) (and (not (null? x)) (not (pair? x))))</code></pre> 
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : les expressions symboliques</h3>
+        
+        <div class="columns two">
+            <div>
+                <p>Schéma de base :</p>
+                <sub><pre class=""><code class="language-scheme">(define F
+  (lambda (l u)
+    (cond ((null? l) (G u))
+          ((atom? (car l))
+           (H (F (cdr l) (K l u))
+              l
+              u))
+          ((list? (car l))
+           (J (F (car l) (Ka l u))
+              (F (cdr l) (Kd l u))
+              l
+              u)))))</code></pre></sub>
+            </div>
+            <div>
+                <p>Schéma simplifié :</p>
+                <sub><pre class=""><code class="language-scheme">(define F
+  (lambda (l)
+    (cond ((null? l) c)
+          ((atom? (car l))
+           (H (F (cdr l)) l))
+          ((list? (car l))
+           (J (F (car l))
+              (F (cdr l))
+              l)))))</code></pre></sub>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : exemples symboliques</h3>
+        
+        <pre class=""><code class="language-scheme">(define flatten
+  (lambda (s)
+    (cond
+      ((null? s) (list '()))
+      ((atom? s) (list s))
+      (else (append (flatten (car s)) (flatten (cdr s)))))))
+
+(define flatten-a
+  (lambda (s a)
+    (cond
+      ((null? s) (cons '() a))
+      ((atom? s) (cons s a))
+      (else (flatten-a (car s) (flatten-a (cdr s) a))))))</code></pre> 
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : exemples symboliques</h3>
+        
+        <pre class="input"><code class="language-scheme">&gt; (flatten '((a .(b .())).((c .(d .())).())))</code></pre>
+        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flatten '((a b) (c d)))</code></pre>
+        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flatten-a '((a .(b .())).((c .(d .())).())) '()) ;; 2 arguments !!!</code></pre>
+        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flatten-a '((a b) (c d)) '(1 2))</code></pre>
+        <pre class="output next"><code class="language-">'(a b () c d () () 1 2)</code></pre>
+        <p class="next">Pour l'implementation de <code>flat-a</code>, voir chapitre 6!</p>
+        <pre class="input next"><code class="language-scheme">&gt; (flat-a '((a .(b .())).((c .(d .())).())) '(1 2))</code></pre>
+        <pre class="output next"><code class="language-">'(a b c d 1 2)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (flat-a '((a b) (c d)) '(1 2))</code></pre>
+        <pre class="output next"><code class="language-">'(a b c d 1 2)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : exemples symboliques revisités :-) I</h3>
+        
+        <pre class=""><code class="language-scheme">(define flatten
+  (lambda (s)
+    (cond
+      ((null? s) (list '()))
+      ((atom? s) (list s))
+      (else (append (flatten (car s)) (flatten (cdr s)))))))
+
+(define flatten-a
+  (lambda (s a)
+    (cond
+      ((null? s) (cons '() a))
+      ((atom? s) (cons s a))
+      (else (flatten-a (car s) (flatten-a (cdr s) a))))))</code></pre> 
+
+      <p>Y a-t-il de la redondance ?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : exemples symboliques revisités :-) II</h3>
+        
+        <pre class=""><code class="language-scheme">(define flatten
+  (lambda (s)
+    (cond
+      ((null? s) (list '()))    ; &#x1f92e;
+      ((atom? s) (list s))      ; &#x1f92e;
+      (else (append (flatten (car s)) (flatten (cdr s)))))))
+
+(define flatten-a
+  (lambda (s a)
+    (cond
+      ((null? s) (cons '() a))  ; &#x1f92e;
+      ((atom? s) (cons s a))    ; &#x1f92e;
+      (else (flatten-a (car s) (flatten-a (cdr s) a))))))</code></pre> 
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : exemples symboliques revisités :-) III</h3>
+        
+        <pre class=""><code class="language-scheme">(define flatten
+  (lambda (s)
+    (cond
+      ((not (pair? s)) (list s))
+      (else (append (flatten (car s)) (flatten (cdr s)))))))
+
+(define flatten-a
+  (lambda (s a)
+    (cond
+      ((not (pair? s)) (cons s a))
+      (else (flatten-a (car s) (flatten-a (cdr s) a))))))
+    
+;; ou en utilisant la forme spéciale if</code></pre> 
+
+        <p>Donc: si <code>null?</code> et <code>atom?</code> sont réduits au même cas de base, pourquoi pas modifié le schéma ?</p>
+    </section>
+
+    <section class="slide">
+        <h3>Récursivité structurelle : listes et expressions symboliques</h3>
+        
+        <p>Une expression symbolique peut-elle s’écrire sans point ?</p>
+
+        <pre class=""><code class="language-scheme">(define point-free?
+  (lambda (s)
+    (or (not (pair? s))
+        (and (point-free? (car s))
+             (list? (cdr s))
+             (point-free? (cdr s))))))</code></pre> 
+        
+        <pre class="input next"><code class="language-scheme">&gt; (point-free? 'a)</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (point-free? '((a . b)))</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (point-free? '(a . (b . ())))</code></pre>
+        <pre class="output next"><code class="language-">#t</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (point-free? '(a b . c))</code></pre>
+        <pre class="output next"><code class="language-">#f</code></pre>
+    </section>
+
+
+    <section class="slide">
+        <h3>Egalité, identité</h3>
+
+        
+        
+        <div class="columns two">
+            <div>
+                <p>Une expression symbolique peut-elle s’écrire sans point ?</p>
+                <ul>
+                    <li class="next"><code>eq?</code> - compare les pointeurs. Renvoie #t ssi les arguments font référence aux mêmes objets en mémoire.</li>
+                    <li class="next"><code>eqv?</code> - renvoie #t ssi ses arguments sont <code>eq?</code> ou si ses arguments sont des nombres qui ont la même valeur.</li>
+                    <li class="next"><code>equal?</code> - renvoie #t si ses arguments ont la même structure.</li>
+                    <li class="next"><code>=</code> - que utilisé pour les nombres</li>
+                </ul>
+                <pre class="input next"><code class="language-scheme">&gt; (equal? '(a . (b . c)) '(a b . c))</code></pre>
+                <pre class="output next"><code class="language-">#t</code></pre>
+            </div>
+            <div>
+                <pre class="next"><code class="language-scheme">(define x '(a . b))
+(define y '(a . b))
+(define z x)</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (eq? 'a 'a)</code></pre>
+                <pre class="output next"><code class="language-">#t</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (eq? x y)</code></pre>
+                <pre class="output next"><code class="language-">#f</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (eq? x z)</code></pre>
+                <pre class="output next"><code class="language-">#t</code></pre>
+            </div>
+        </div>
     </section>
 
     <div class="progress"></div>
