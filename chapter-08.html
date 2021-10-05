@@ -425,18 +425,18 @@ given: '()</code></pre>
         <h3>Récursivité structurelle : exemples symboliques</h3>
         
         <pre class="input"><code class="language-scheme">&gt; (flatten '((a .(b .())).((c .(d .())).())))</code></pre>
-        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="output next"><code class="language-">(a b () c d () ())</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (flatten '((a b) (c d)))</code></pre>
-        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="output next"><code class="language-">(a b () c d () ())</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (flatten-a '((a .(b .())).((c .(d .())).())) '()) ;; 2 arguments !!!</code></pre>
-        <pre class="output next"><code class="language-">'(a b () c d () ())</code></pre>
+        <pre class="output next"><code class="language-">(a b () c d () ())</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (flatten-a '((a b) (c d)) '(1 2))</code></pre>
-        <pre class="output next"><code class="language-">'(a b () c d () () 1 2)</code></pre>
+        <pre class="output next"><code class="language-">(a b () c d () () 1 2)</code></pre>
         <p class="next">Pour l'implementation de <code>flat-a</code>, voir chapitre 6!</p>
         <pre class="input next"><code class="language-scheme">&gt; (flat-a '((a .(b .())).((c .(d .())).())) '(1 2))</code></pre>
-        <pre class="output next"><code class="language-">'(a b c d 1 2)</code></pre>
+        <pre class="output next"><code class="language-">(a b c d 1 2)</code></pre>
         <pre class="input next"><code class="language-scheme">&gt; (flat-a '((a b) (c d)) '(1 2))</code></pre>
-        <pre class="output next"><code class="language-">'(a b c d 1 2)</code></pre>
+        <pre class="output next"><code class="language-">(a b c d 1 2)</code></pre>
     </section>
 
     <section class="slide">
@@ -523,8 +523,6 @@ given: '()</code></pre>
     <section class="slide">
         <h3>Egalité, identité</h3>
 
-        
-        
         <div class="columns two">
             <div>
                 <p>Une expression symbolique peut-elle s’écrire sans point ?</p>
@@ -549,6 +547,113 @@ given: '()</code></pre>
                 <pre class="output next"><code class="language-">#t</code></pre>
             </div>
         </div>
+    </section>
+
+    <section class="slide">
+        <h3>"Déconstruction"</h3>
+
+        <pre class=""><code class="language-scheme">(define describe
+  (lambda (s)
+    (cond ((null? s) (quote '()))
+          ((number? s) s)
+          ((symbol? s) (list 'quote s))
+          ((pair? s) (list 'cons (describe (car s)) (describe (cdr s))))
+          (else s))))</code></pre> 
+          
+          <pre class="input next"><code class="language-scheme">&gt; (describe '((a . b) . (c . d)))</code></pre>
+          <pre class="output next"><code class="language-">(cons (cons 'a 'b) (cons 'c 'd))</code></pre>
+          <pre class="input next"><code class="language-scheme">&gt; (cons 1 (cons (cons (cons 'a '()) (cons 2 '())) '()))</code></pre>
+          <pre class="output next"><code class="language-">(1 ((a) 2))</code></pre>
+          <pre class="input next"><code class="language-scheme">&gt; (eval (describe '(1 ((a) 2))))</code></pre>
+          <pre class="output next"><code class="language-">(1 ((a) 2))</code></pre>
+
+          <p class="note">Attention : La troisième expression ne fonctionnera que dans l'environnement REPL 
+              (cf. <a href="https://docs.racket-lang.org/guide/eval.html" target="_blank">15.1.2 Namespaces</a>).</p>
+    </section>
+
+    <section class="slide">
+        <h3>"Déconstruction" II</h3>
+
+        <pre class=""><code class="language-scheme">(define describe
+  (lambda (s)
+    (cond ((null? s) (quote '()))
+          ((number? s) s)
+          ((symbol? s) (list 'quote s))
+          ((pair? s) (list 'cons (describe (car s)) (describe (cdr s))))
+          (else s))))</code></pre> 
+
+          <pre class="input next"><code class="language-scheme">&gt; (describe '((a . b) . (c . d)))</code></pre>
+          <pre class="output next"><code class="language-">(cons 1 (cons (cons (cons 'a '()) (cons 2 '())) '()))</code></pre>
+          <pre class="input next"><code class="language-scheme">&gt; (cons 1 (cons (cons (cons 'a '()) (cons 2 '())) '()))</code></pre>
+          <pre class="output next"><code class="language-">((a . b) c . d)</code></pre>
+          <pre class="input next"><code class="language-scheme">&gt; (eval (describe '((a . b) . (c . d))))</code></pre>
+          <pre class="output next"><code class="language-">((a . b) c . d)</code></pre>
+
+          <p class="note">Attention : La troisième expression ne fonctionnera que dans l'environnement REPL 
+              (cf. <a href="https://docs.racket-lang.org/guide/eval.html" target="_blank">15.1.2 Namespaces</a>).</p>
+    </section>
+
+    <section class="slide">
+        <h3>"Déconstruction" - Pretty Printing</h3>
+
+        <sub><pre class=""><code class="language-scheme">(define lcons 6) ;; longueur de "(cons "
+
+(define dis      ;; (dis n) ecrit n blancs
+  (lambda (n) (if (zero? n) (display "") (begin (display " ") (dis (- n 1))))))
+
+(define disp (lambda (n m) (dis (+ n (* m lcons)))))
+
+(define pretty
+  (lambda (d n m)
+    (if (not (pair? d))
+        (begin (disp n 0) 
+               (cond ((symbol? d) (display "'"))) ; diff. de la "vielle" diapo
+               (display d))
+        (begin (display "(cons ")
+               (pretty (car d) 0 (+ m 1))
+               (newline)
+               (disp n (+ m 1))
+               (pretty (cdr d) 0 (+ m 1))
+               (display ")")))))
+
+(define pr (lambda (d) (begin (pretty d 0 0) (newline)))) ; newline après (goût personnel)</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>"Déconstruction" - Pretty Printing</h3>
+
+        <div class="columns two">
+            <div>
+                <sub><pre class="input next"><code class="language-scheme">&gt; (pr 'a)</code></pre>
+                <pre class="output next"><code class="language-">'a</code></pre>
+                <pre class="input next"><code class="language-scheme">&gt; (pr '(a . (b . 1)))</code></pre>
+                <pre class="output next"><code class="language-">(cons 'a
+      (cons 'b
+            1))</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (pr '(a b c d))</code></pre>
+            <pre class="output next"><code class="language-">(cons 'a
+  (cons 'b
+        (cons 'c
+              ())))</code></pre></sub>
+            </div>
+            <div>
+                <sub><pre class="input next"><code class="language-scheme">&gt; (pr '((a . (b . 1)) . ((c . 2) . ((d . 3) . e))))</code></pre>
+                <pre class="output next"><code class="language-">(cons (cons 'a
+            (cons 'b
+                  1))
+      (cons (cons 'c
+                  2)
+            (cons (cons 'd
+                        3)
+                  'e)))</code></pre></sub>
+
+            </div>
+        </div>
+        <br />
+        <ul>
+            <li class="next">Question : Pourquoi <code>pr</code> n'est-il pas (vraiment) fonctionnel ?</li>
+            <li class="next">Question : Pouvez-vous penser à des façons de rendre <code>pr</code> fonctionnel?</li>
+        </ul>
     </section>
 
     <div class="progress"></div>
