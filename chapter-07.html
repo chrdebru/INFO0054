@@ -543,7 +543,7 @@
         <p>Dans le cas de <code>fact-c</code>, l'exécution construit itérativement une fonction de plus en plus complexe, représentant
             l'enchaînement des multiplications à faire. A chaque étape, l'argument continuation est transformé en une
             fonction impliquant une multiplication supplémentaire ; cette fonction est l'argument de l'appel suivant. Les
-            calculs numériques n'ont lieu que quand l'enchaînement complet des multiplications aété formé. Cette
+            calculs numériques n'ont lieu que quand l'enchaînement complet des multiplications a été formé. Cette
             technique est le <em>Continuation-Passing Style</em> (CPS). Elle ressemble à la technique de séparation fonctionnelle vue
             précédemment.</p>
     </section>
@@ -574,7 +574,7 @@
 
         <br />
 
-        <p class="next">On comparera les couples (<code>pl-c</code>,<code>pl</code>) et (<code>p2</code>,<code>pl2</code>), tr. 86.</p>
+        <p class="next">On comparera les couples (<code>pl-c</code>,<code>pl</code>) et (<code>p2</code>,<code>pl2</code>).</p>
     </section>
 
     <section class="slide">
@@ -671,7 +671,7 @@
         <p class="specification">
             Si $s$ est un symbole, <br />
             si $l$ est une liste de symboles <br />
-            et si $c$ est une fonction de $\mathbb{N} \to \mathbb{N}$ dans $D$, <br />
+            et si $c$ est une fonction de $\mathbb{N} \times \mathbb{N}$ dans $D$, <br />
             alors <code>(c3 l s c)</code> vaut $c(a,b)$, <br />
             où $a$ est le nombre d'occurrences de $s$ dans $l$ et <br />
             où $b$ est le nombre d'occurrences de symboles distincts de $s$ dans $l$.
@@ -733,7 +733,7 @@
           (else (+ (car l) (cadr l))))))</code></pre>
 
         <pre class="input next"><code class="language-scheme">&gt; (hfib '(8 5 3 2 1 1 0))</code></pre>
-        <pre class="output next"><code class="language-scheme">(hfib '(8 5 3 2 1 1 0))</code></pre>
+        <pre class="output next"><code class="language-scheme">13</code></pre>
     </section>
 
     <section class="slide">
