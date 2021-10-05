@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 09 : Abstraction et blocs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        @page {
+           size: 1024px 768px;
+           border: 1px solid black;
+        }
+        
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+        
+        pre[class*=language-].info {
+            background-color:ivory;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].info code {
+            color: magenta;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px; 
+            color: red;
+        }
+
+        .slide table {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide table tr td {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide th:first-child, .slide td:first-child {
+            padding-left: 0px;
+        }
+
+        .slide th:last-child, .slide td:last-child {
+            padding-right: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 09 : Abstraction et blocs</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 09 : Abstraction et blocs</h2>
+        <h3>Forme spéciale <code>let</code> I</h3>
+        
+        <p>Abstraire (nommer) une sous-expression: </p>
+
+        <p>Calcul de $2(a+b)^2+(a+b)(a-c)^2+(a-c)^3$ </p>
+ 
+        <div class="columns two">
+            <div class="next">
+                <p>Approche naïve :</p>
+                <pre><code class="language-scheme">(+ (* 2 (+ a b) (+ a b))
+   (* (+ a b) (- a c) (- a c))
+   (* (- a c) (- a c) (- a c)))</code></pre>
+            </div>
+            <div class="next">
+                <p>Approche économique et structurée :</p>
+                <pre><code class="language-scheme">(let ((x (+ a b)) (y (- a c)))
+  (+ (* 2 x x)
+     (* x y y)
+     (* y y y)))</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Forme spéciale <code>let</code> II</h3>
+        
+        <p>Evaluer $2(a+b)^2+(a+b)(a-c)^2+(a-c)^3$ en calculant d’abord $x = a + b$ et $y = a - c$,
+            c’est appliquer la fonction $(x, y) \to 2x^2 + xy^2 + y^3$ aux arguments $x = a + b$ et $y = a - c$.</p>
+
+        <p class="next"><em>Définition</em> : <br /><code class="language-scheme">(let ((x &alpha;) (y &beta;)) &gamma;)</code> 
+            est la variante syntaxique de <code class="language-scheme">((lambda (x y) &gamma;) &alpha; &beta;)</code></p>
+
+        <p class="next">L'expression</p>
+
+        <pre class="next"><code class="language-scheme">(let ((x (+ a b))
+      (y (- a c)))
+  (+ (* 2 x x) (* x y y) (* y y y)))</code></pre>
+
+        <p class="next">est donc strictement équivalent à</p>
+
+        <pre class="next"><code class="language-scheme">((lambda (x y)
+   (+ (* 2 x x) (* x y y) (* y y y)))
+ (+ a b)
+ (- a c))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Procédures locales</h3>
+
+        <sub><pre><code class="language-scheme">(define hypo
+  (lambda (x y)
+    (sqrt (+ (square x) (square y)))))
+
+(define square
+  (lambda (x) (* x x)))</code></pre></sub>
+  
+        <br />
+
+        <p class="next">Comment empêcher l’usage autonome de <code>square</code> ?</p>
+
+        <div class="columns two">
+            <sub><pre class="next"><code class="language-scheme">;; Variante 1
+(define hypo1
+  (let ((square (lambda (x) (* x x))))
+    (lambda (x y)
+      (sqrt (+ (square x) (square y))))))</code></pre></sub>
+
+        <sub><pre class="next"><code class="language-scheme">;; Variante 2
+(define hypo2
+  (lambda (x y)
+    (let ((square (lambda (x) (* x x))))
+      (sqrt (+ (square x) (square y))))))</code></pre></sub>
+        </div>
+
+        <br />
+
+        <p class="next">Discussion ! Est-ce économique ? Expliquez.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Forme <code>let*</code> : abrège des <code>let</code> imbriqués</h3>
+
+        <sub><pre><code class="language-scheme">(let* ((x (+ a b)) (y (- a b)) (z (* x y)))
+  (+ (* x x) z z (* y y)))
+
+(let ((x (+ a b)) (y (- a b)))
+  (let ((z (* x y)))
+    (+ (* x x) z z (* y y))))
+
+(let ((x (+ a b)))
+  (let ((y (- a b)))
+    (let ((z (* x y)))
+      (+ (* x x) z z (* y y)))))</code></pre></sub>
+  
+        <br />
+
+        <p class="next">Ces trois formes sont équivalentes ; la valeur dépend des valeurs de <code>a</code> et <code>b</code>.</p>
+
+        <p class="next">Par contre, la valeur de</p>
+
+        <sub><pre class="next"><code class="language-scheme">(let ((x (+ a b)) (y (- a b)) (z (* x y)))
+  (+ (* x x) z z (* y y))))</code></pre></sub>
+
+        <br />
+
+        <p class="next">dépend des valeurs de <code>a</code>, <code>b</code>, <code>x</code> et <code>y</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique I</h3>
+
+        $$f(n)=_{def}(\sum_{i=0}^{n-1‎}([2+f(i)]\times[3+f(n-i-1)]))\mod(2n+3)$$
+
+        <p class="next">Version naïve, traduction littérale.</p>
+
+        <sub><pre class="next"><code class="language-scheme">(define f0
+  (lambda (n)
+    (modulo (apply +
+                   (map (lambda (i)
+                          (* (+ 2 (f0 i))
+                             (+ 3 (f0 (- n i 1)))))
+                        (enum 0 (- n 1))))
+            (+ n n 3))))</code></pre></sub>
+
+        <sub><pre class="next"><code class="language-scheme">(define enum
+  (lambda (start stop)
+    (if (> start stop) '() (cons start (enum (+ start 1) stop)))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique II</h3>
+
+        <p>Pour plus d'informations sur <code>time</code>, consultez la <a
+                href="https://docs.racket-lang.org/reference/time.html" target="_blank">documentation</a>.</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (time (f0 12))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 203 real time: 227 gc time: 0</code></pre>
+        <pre class="output next"><code class="language-">1</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (time (f0 13))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 1109 real time: 944 gc time: 515</code></pre>
+        <pre class="output next"><code class="language-">8</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (time (f0 14))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 3296 real time: 2827 gc time: 1437</code></pre>
+        <pre class="output next"><code class="language-">16</code></pre>
+
+        <br />
+
+        <p class="next">Le temps d'exécution est catastrophique !</p>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
