@@ -136,8 +136,8 @@
     <section class="slide">
         <h3>Forme spéciale <code>let</code> II</h3>
         
-        <p>Evaluer $2(a+b)^2+(a+b)(a-c)^2+(a-c)^3$ en calculant d’abord $x = a + b$ et $y = a - c$,
-            c’est appliquer la fonction $(x, y) \to 2x^2 + xy^2 + y^3$ aux arguments $x = a + b$ et $y = a - c$.</p>
+        <p>Evaluer $2(a+b)^2+(a+b)(a-c)^2+(a-c)^3$ en calculant d'abord $x = a + b$ et $y = a - c$,
+            c'est appliquer la fonction $(x, y) \to 2x^2 + xy^2 + y^3$ aux arguments $x = a + b$ et $y = a - c$.</p>
 
         <p class="next"><em>Définition</em> : <br /><code class="language-scheme">(let ((x &alpha;) (y &beta;)) &gamma;)</code> 
             est la variante syntaxique de <code class="language-scheme">((lambda (x y) &gamma;) &alpha; &beta;)</code></p>
@@ -168,7 +168,7 @@
   
         <br />
 
-        <p class="next">Comment empêcher l’usage autonome de <code>square</code> ?</p>
+        <p class="next">Comment empêcher l'usage autonome de <code>square</code> ?</p>
 
         <div class="columns two">
             <sub><pre class="next"><code class="language-scheme">;; Variante 1
@@ -219,9 +219,30 @@
     </section>
 
     <section class="slide">
+        <h3>Les fonctions <code>map</code> et <code>apply</code></h3>
+
+        <pre class="input"><code class="language-scheme">&gt; (map + '(1 2 3) '(4 5 6))</code></pre>
+        <pre class="output next"><code class="language-">(5 7 9)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (map + '(1 2 3) '(4 5 6 7))</code></pre>
+        <pre class="error next"><code class="language-">map: all lists must have same size [...] procedure: #&lt;procedure:+&gt;</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (map + '(1 2 3) '(4 5 6) '(7 8 9))</code></pre>
+        <pre class="output next"><code class="language-">(12 15 18)</code></pre>
+
+        <pre class="input next"><code class="language-scheme">&gt; (map (lambda (x y) (+ x y)) '(1 2 3) '(4 5 6))</code></pre>
+        <pre class="output next"><code class="language-">(5 7 9)</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (map (lambda (x y z) (+ x y z)) '(1 2 3) '(4 5 6) '(7 8 9))</code></pre>
+        <pre class="output next"><code class="language-">(12 15 18)</code></pre>
+
+        <p class="next">Que faire si le nombre d'arguments peut être arbitraire ?</p>
+        <pre class="input next"><code class="language-scheme">&gt; (map (lambda x (apply + x)) '(1 2 3) '(4 5 6) '(7 8 9))</code></pre>
+        <pre class="output next"><code class="language-">(12 15 18)</code></pre>
+        <p class="next">Nous utilisons un lambda ayant une variable sans parenthèses. Cette variable contient une liste avec chaque argument.</p>
+    </section>
+
+    <section class="slide">
         <h3>Une fonction arithmétique I</h3>
 
-        $$f(n)=_{def}(\sum_{i=0}^{n-1‎}([2+f(i)]\times[3+f(n-i-1)]))\mod(2n+3)$$
+        <p>$$(n)=_{def}(\sum_{i=0}^{n-1‎}([2+f(i)]\times[3+f(n-i-1)]))\mod(2n+3)$$</p>
 
         <p class="next">Version naïve, traduction littérale.</p>
 
@@ -236,7 +257,7 @@
 
         <sub><pre class="next"><code class="language-scheme">(define enum
   (lambda (start stop)
-    (if (> start stop) '() (cons start (enum (+ start 1) stop)))))</code></pre></sub>
+    (if (&gt; start stop) '() (cons start (enum (+ start 1) stop)))))</code></pre></sub>
     </section>
 
     <section class="slide">
@@ -260,6 +281,521 @@
         <br />
 
         <p class="next">Le temps d'exécution est catastrophique !</p>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique III</h3>
+
+        <p>Nos fonctions <code>gib</code> et <code>gib-a</code>.</p>
+
+        <pre class="next"><code class="language-scheme">(define gib (lambda (n h) (h (gib-a n h '()))))
+
+(define gib-a
+  (lambda (n h l) (if (= n 0) l (gib-a (- n 1) h (cons (h l) l)))))</code></pre>
+
+      <p class="next">Créer une fonction $h$ pour notre fonction arithmétique : <code>harith</code>.</p>
+
+      <pre class="next"><code class="language-scheme">(define harith
+  (lambda (l)
+    (modulo (apply +
+                   (map (lambda (u v) (* (+ 2 u) (+ 3 v)))
+                        l
+                        (reverse l)))
+            (let ((s (length l))) (+ s s 3)))))
+
+(define f1 (lambda (n) (gib n harith)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique IV</h3>
+
+        <pre><code class="language-scheme">(define f (lambda (n) (fa n 0 '() '())))
+
+(define fa
+  (lambda (k i u v)
+    (let ((next
+           (modulo (apply +
+                          (map (lambda (x y)
+                                 (* (+ 2 x) (+ 3 y))) u v))
+                   (+ i i 3))))
+      (if (zero? k)
+          next
+          (fa (- k 1)
+              (+ i 1)
+              (cons next u)
+              (append v (list next)))))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique V</h3>
+
+        <p class="specification">Si <code>k</code>, <code>i</code>, <code>u</code> et <code>v</code> ont pour valeurs
+            respectives les naturels $i$, $k$ et les listes 
+            $[f(i - 1), ..., f(0)]$ et 
+            $[f(0), ..., f(i - 1)]$, alors (fa k i u v) a pour valeur $f(k+i)$.</p>
+
+            <pre class="input"><code class="language-scheme">&gt; (fa 8 5 '(10 3 3 1 0) '(0 1 3 3 10))</code></pre>
+            <pre class="output next"><code class="language-">8</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (fa 6 7 '(9 0 10 3 3 1 0) '(0 1 3 3 10 0 9))</code></pre>
+            <pre class="output next"><code class="language-">8</code></pre>
+            <pre class="input next"><code class="language-scheme">&gt; (f 13)</code></pre>
+            <pre class="output next"><code class="language-">8</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Une fonction arithmétique VI</h3>
+       
+        <pre class="input next"><code class="language-scheme">&gt; (time (f1 14))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 0 real time: 0 gc time: 0</code></pre>
+        <pre class="output next"><code class="language-">16</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (time (f1 140))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 0 real time: 0 gc time: 0</code></pre>
+        <pre class="output next"><code class="language-">195</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (time (f1 1400))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 61 real time: 65 gc time: 12</code></pre>
+        <pre class="output next"><code class="language-">1477</code></pre>
+        <pre class="input next"><code class="language-scheme">&gt; (time (f 1400))</code></pre>
+        <pre class="info next"><code class="language-">cpu time: 53 real time: 57 gc time: 1</code></pre>
+        <pre class="output next"><code class="language-">1477</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Forme <code>letrec</code></h3>
+
+        <p><code>letrec</code> construction essentielle !</p>
+       
+        <pre><code class="language-scheme">(define power4
+  (lambda (n)
+    (let ((square (lambda (m) (* m m))))
+      (square (square n)))))
+
+(define fact
+  (lambda (n)
+    (letrec ((fact-it
+              (lambda (k acc)
+                (if (= k 0) acc (fact-it (- k 1) (* k acc))))))
+      (fact-it n 1))))</code></pre>
+
+      <p><code>let</code> permet des définitions locales non récursives seulement ; <code>letrec</code> permet en plus des définitions locales récursives.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Portée I</h3>
+       
+            <div class="columns two">
+                <div>
+                    <pre class="input"><code class="language-scheme">&gt; (define a 5)</code></pre>
+                    <pre class="output"><code class="language-">...</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (add1 a)</code></pre>
+                    <pre class="output"><code class="language-">6</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (let ((a 3)) (add1 a))</code></pre>
+                    <pre class="output"><code class="language-">4</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (let ((c 3)) (add1 c))</code></pre>
+                    <pre class="output"><code class="language-">4</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (add1 3)</code></pre>
+                    <pre class="output"><code class="language-">4</code></pre>
+                </div>
+                <div>
+                    <pre class="input"><code class="language-scheme">&gt; (add1 a)</code></pre>
+                    <pre class="output"><code class="language-">6</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (define f
+  (let ((b 100))
+    (lambda (x) (+ x b))))</code></pre>
+                    <pre class="output"><code class="language-">...</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (let ((b 10)) (f 25))</code></pre>
+                    <pre class="output"><code class="language-">125</code></pre>
+                </div>
+            </div>
+
+        <p>La plupart des confusionséventuelles proviennent d'un téléscopage de noms. Il suffit d'appliquer méthodiquement
+            les règles d'évaluation pouréviter les erreurs. On peut aussi renommer (mentalement) certaines variables liées.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Portée II</h3>
+       
+        <sub>
+            <pre class="input"><code class="language-scheme">&gt; (let ((a 5))
+    (let ((fun (lambda (x) (max x a))))
+      (let ((a 10) (x 20))
+        (fun 1))))</code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (let ((c 5))
+    (let ((fun (lambda (y) (max y c))))
+      (let ((a 10) (x 20))
+        (fun 1))))</code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (let ((fun (lambda (x) (max x 5))))
+    (let ((a 10) (x 20))
+      (fun 1)))</code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (let ((fun (lambda (x) (max x 5))))
+    (fun 1))</code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; ((lambda (x) (max x 5)) 1) </code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (max 1 5)</code></pre>
+            <pre class="output"><code class="language-">5</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Schémas récursifs avec <code>let</code> I</h3>
+       
+        <pre class=""><code class="language-scheme">(define F
+  (lambda (n u)
+    (if (zero? n)
+        (G u)
+        (H (F (- n 1) (K n u)) n u))))</code></pre>
+        
+        <ul>
+            <li>Seule exigence pour <code>G</code>, <code>H</code> et <code>K</code> : la terminaison.</li>
+            <li><code>H</code> peut être difficile à découvrir (c'est rarement le cas pour <code>G</code> et <code>K</code>).</li>
+            <li><code>H</code> peut induire un calcul multiple d'argument (pas <code>G</code> ni <code>K</code>).</li>
+            <li>On réduit significativement le premier problème... et on élimine le second en utilisant <code>let</code> :</li>
+        </ul>
+        
+        <pre class=""><code class="language-scheme">(define F
+  (lambda (n u)
+    (if (zero? n)
+        (G u)
+        (let ((v (F (- n 1) (K n u))))
+          (H v n u)))))   ;; utile si plusieurs occurrences de v</code></pre>      
+    </section>
+
+    <section class="slide">
+        <h3>Schémas récursifs avec <code>let</code> II</h3>
+    
+        <p>La variante avec <code>let</code> est spécialement utile si <code>(H v n u)</code>
+            est une expression complexe, comportant plusieurs occurrences de <code>v</code>.</p>
+    
+        <div class="columns two">
+            <div>
+                <sub><pre class=""><code class="language-scheme">(define f
+  (lambda (n u)
+    (if (zero? n)
+        u
+        (let ((v (f (- n 1) u)))
+          (/ (- 2 v (/ (* v v) u)) 3)))))</code></pre></sub>
+            </div>
+            <div>
+                <sub><pre class=""><code class="language-scheme">(define f
+  (lambda (n u)
+    (if (zero? n)
+        u
+        (/ (- 2 (f (- n 1) u)
+              (/ (* (f (- n 1) u)
+                    (f (- n 1) u)) u))</code></pre></sub>
+            </div>
+        </div>
+
+        <br />
+
+        <p>Le premier programme est d'efficacité linéaire en <code>n</code>, tandis que le second, moins lisible, est
+            exponentiel.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Schémas récursifs avec <code>let</code> III</h3>
+    
+        <p>Double comptage – rappel.</p>
+    
+        <pre class="input"><code class="language-scheme">&gt; (count '(a b a c d a c) 'a)</code></pre>
+        <pre class="output"><code class="language-">(3 . 4)</code></pre>
+
+        <p>L'utilisation brutale du schéma donne un programme inefficace :</p>
+
+        <pre class=""><code class="language-scheme">(define count1
+  (lambda (l s)
+    (if (null? l)
+        (cons 0 0)
+        (if (eq? (car l) s)
+            (cons (1+ (car (count1 (cdr l) s)))
+                  (cdr (count1 (cdr l) s)))
+            (cons (car (count1 (cdr l) s))
+                  (1+ (cdr (count1 (cdr l) s))))))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Schémas récursifs avec <code>let</code> IV</h3>
+    
+        <p>Une solution efficace est possible avec <code>let</code> :</p>
+
+        <pre class=""><code class="language-scheme">(define count5
+  (lambda (l s)
+    (if (null? l)
+        (cons 0 0)
+        (let ((rec (count5 (cdr l) s)))
+          (if (eq? (car l) s)
+              (cons (1+ (car rec))
+                    (cdr rec))
+              (cons (car rec)
+                    (1+ (cdr rec))))))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Schémas récursifs avec <code>let</code> V</h3>
+        <div class="columns two">
+            <div>
+                <p>a solution est strictement équivalente à</p>
+                <sub><pre class=""><code class="language-scheme">(define count5
+  (lambda (l s)
+    (if (null? l)
+        (cons 0 0)
+        ((lambda (rec)
+           (if (eq? (car l) s)
+               (cons (1+ (car rec))
+                     (cdr rec))
+               (cons (car rec)
+                     (1+ (cdr rec)))))
+         (count5 (cdr l) s))))))</code></pre></sub>
+            </div>
+            <div>
+                <p>ou à</p>
+                <sub><pre class=""><code class="language-scheme">(define count5
+  (lambda (l s)
+    (if (null? l)
+        (cons 0 0)
+        (aux (count5 (cdr l) s)))))
+
+(define aux
+  (lambda (rec)
+    (if ... (1+ (cdr rec)))))</code></pre></sub>
+            </div>
+        </div>
+
+        <br />
+        
+        <p>On comparera cette solution aux précédentes et on notera l'utilité de l'omniprésent <code>lambda</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Sous-ensembles I</h3>
+        <p>Les sous-ensembles de $\{a,b,c\}$ sont : $\{\}$, $\{a\}$, $\{b\}$, 
+            $\{c\}$, $\{a,b\}$, $\{a,c\}$, $\{b,c\}$, $\{a,b,c\}$.</p>
+        
+        <p>On pourrait générer séparément les sous-ensembles de 0, de 1, de 2 et de 3 
+            éléments mais l'usage direct d'un schéma récursif est plus simple.</p>
+        
+        <p>Représentation d'un ensemble : liste sans répétition.</p>
+        
+        <p>On examine comment la liste des sous-ensembles de $\{a,b,c\}$ se construit au 
+            départ de la liste des sous-ensembles de $\{b, c\}$, 
+            c'est-à-dire $\{\}$, $\{b\}$, $\{c\}$, $\{b,c\}$.</p>
+        
+        <p>On observe d'abord que les sous-ensembles de $\{b,c\}$ sont aussi 
+            des sous-ensembles de $\{a,b,c\}$, mais que la réciproque n'est pas vraie; 
+            les sous-ensembles manquants sont $\{a\}$, $\{a,b\}$, $\{a,c\}$, $\{a,b,c\}$.</p>
+        
+        <p>On observe ensuite que les sous-ensembles nouveaux sont les anciens dans 
+            lesquels on a inséré l'élément nouveau $a$.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Sous-ensembles II</h3>
+        <sub><pre class=""><code class="language-scheme">(define subsets ;; version inefficace !
+  (lambda (e)
+    (if (null? e)
+        '(())
+        (append (subsets (cdr e)) (insert-in-all (car e) (subsets (cdr e))))</code></pre></sub>
+
+        <br />
+
+        <p>La fonction auxiliaire <code>insert-in-all</code> prend comme arguments un objet 
+            <code>x</code> et une liste de listes <code>ll</code>. Elle renvoie une liste de 
+            listes, dont les éléments sont ceux de <code>ll</code> préfixés de <code>x</code>.</p>
+
+        <sub><pre class=""><code class="language-scheme">(define insert-in-all
+  (lambda (x ll)
+    (if (null? ll)
+        '()
+        (cons (cons x (car ll)) (insert-in-all x (cdr ll))))))</code></pre></sub>
+        
+        <br />
+        
+        <p>Cette solution est correcte mais très inefficace : l'appel <code>(subsets e)</code>, 
+            quand <code>e</code> n'est pas vide, provoque deux appels récursifs à
+            <code>(subsets (cdr e))</code>.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Sous-ensembles III</h3>
+
+        <p>Version efficace : </p>
+        <sub><pre class=""><code class="language-scheme">(define subsets
+  (lambda (e)
+    (if (null? e)
+        '(())
+        ((lambda (le) (append le (insert-in-all (car e) le)))
+         (subsets (cdr e))))))</code></pre></sub>
+
+        <br />
+
+        <p>Version équivalente, plus lisible : </p>
+
+        <sub><pre class=""><code class="language-scheme">(define subsets
+  (lambda (e)
+    (if (null? e)
+        '(())
+        (let ((rec (subsets (cdr e))))
+          (append rec (insert-in-all (car e) rec))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions I</h3>
+
+        <p>La structure de l'ensemble des partitions d'un ensemble donné est peu apparente, 
+            mais cela n'empêche pas l'usage de la récursion. Il est naturel de considérer 
+            d'abord un exemple. Les cinq partitions de $\{a,b,c\}$ sont
+            $\{\{a\}, \{b\}, \{c\}\}$, $\{\{a\},\{b,c\}\}$, $\{\{b\},\{a,c\}\}$, 
+            $\{\{c\},\{a,b\}\}$, $\{\{a, b, c\}\}$ .</p>
+            
+        <p>Les partitions de $\{b,c\}$ sont $\{\{b\}, \{c\}\}$, $\{\{b, c\}\}$ .</p>
+        
+        <p>On observe qu'une partition de $\{a,b,c\}$ est obtenue au départ 
+            d'une partition de $\{b, c\}$ selon deux techniques :</p>
+            
+        <ol>
+            <li>En insérant le singleton $\{a\}$ comme partie supplémentaire ; 
+                $\{\{b\},\{c\}\}$ donne $\{\{a\},\{b\},\{c\}\}$; 
+                $\{\{b,c\}\}$ donne $\{\{a\},\{b,c\}\}$.</li>
+            <li>En insérant l'élément $a$ dans une partie existante ; 
+                $\{\{b\},\{c\}\}$ donne $\{\{a,b\},\{c\}\}$ et $\{\{b\},\{a,c\}\}$; 
+                $\{\{b,c\}\}$ donne $\{\{a,b,c\}\}$.</li>
+        </ol>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions II</h3>
+
+        <sub><pre class=""><code class="language-scheme">(define partitions
+  (lambda (e)
+    (if (null? e)
+        '(())
+        (append (procede-1 (car e) (partitions (cdr e)))
+                (procede-2 (car e) (partitions (cdr e)))))))</code></pre></sub>
+
+        <p>Attention à l'(in)efficacité !</p>
+
+        <sub><pre class=""><code class="language-scheme">(define partitions
+  (lambda (e)
+    (if (null? e)
+        '(())
+        (let ((rec (partitions (cdr e))))
+          (append (procede-1 (car e) rec)
+                  (procede-2 (car e) rec))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions III</h3>
+
+        <sub><pre class=""><code class="language-scheme">(define procede-1
+  (lambda (x lp) (insert-in-all (list x) lp)))
+
+(define insert-in-all
+  (lambda (x le)
+    (if (null? le)
+        '()
+        (cons (cons x (car le)) (insert-in-all x (cdr le))))))
+
+(define procede-2
+  (lambda (x lp) (append-map (lambda (p) (split x p)) lp)))
+
+;(define append-map
+;  (lambda (f l)
+;    (if (null? l)
+;        '()
+;        (append (f (car l)) (append-map f (cdr l))))))
+
+(define append-map (lambda (f l) (apply append (map f l))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions IV</h3>
+
+        <pre class="input"><code class="language-scheme">&gt; (procede-1 'a '(((b))))</code></pre>
+        <pre class="output"><code class="language-">(((a) (b)))</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (procede-2 'a '(((b))))</code></pre>
+        <pre class="output"><code class="language-">(((a b)))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions V</h3>
+
+        <p>La fonction <code>split</code> réalise le procédé 2 proprement dit, pour 
+            une partition. Comme toujours lorsque l'on spécifie une fonction auxiliaire, 
+            il convient de le faire de la manière la plus générale possible. Le 
+            second argument ne sera donc pas nécessairement une partition, mais une 
+            quelconque liste de listes.</p>
+
+        <sub>
+            <pre class="input"><code class="language-scheme">&gt; (split 'a '((b) (c)))</code></pre>
+            <pre class="output"><code class="language-">(((a b) (c)) ((b) (a c)))</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (split 'a '((b c)))</code></pre>
+            <pre class="output"><code class="language-">(((a b c)))</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (split '2 '((1 2) () (3)))</code></pre>
+            <pre class="output"><code class="language-">(((2 1 2) () (3)) ((1 2) (2) (3)) ((1 2) () (2 3)))</code></pre>
+        </sub>
+
+        <br />
+
+        <p>Construction de <code>split</code> : facile par la tactique habituelle ; 
+            comment obtient-on <code>(split x ll)</code> à partir de <code>(split x (cdr ll))</code> ? 
+            Un exemple est toujours  éclairant :</p>
+
+        <sub>
+            <pre class="input"><code class="language-scheme">&gt; (split '0 (() (3)))        ;; (split x (cdr ll))</code></pre>
+            <pre class="output"><code class="language-">(((0) (3)) (() (0 3)))</code></pre>
+            <pre class="input"><code class="language-scheme">&gt; (split '0 '((1 2) () (3))) ;; (split x ll)</code></pre>
+            <pre class="output"><code class="language-">(((0 1 2) () (3)) ((1 2) (0) (3)) ((1 2) () (0 3)))</code></pre>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Partitions VI</h3>
+
+        <p>Le premier élément du résultat est à créer de toutes pièces ; c'est
+            <code>[[(cons (cons x (car ll)) (cdr ll))]]</code>. Le reste s'obtient en 
+            remplaçant dans <code>[[(split x (cdr ll))]]</code> (liste de listes de listes) 
+            chaque élément <code>[[ss]]</code> (liste de listes) par 
+            <code>[[(cons (car ll) ss)]]</code>.</p>
+
+        <sub>
+            <pre class=""><code class="language-scheme">(define split
+  (lambda (x ll)
+    (if (null? ll)
+        '()
+        (cons (cons (cons x (car ll)) (cdr ll))
+              (map (lambda (ss) (cons (car ll) ss))
+                   (split x (cdr ll)))))))</code></pre>
+        </sub>
+
+        <br />
+
+        <p>On peut à présent utiliser la fonction <code>partition</code> :</p>
+
+        <sub>
+            <pre class="input"><code class="language-scheme">&gt; (partitions '(a b c))</code></pre>
+            <pre class="output"><code class="language-">(((a) (b) (c)) ((a) (b c)) ((a b) (c)) ((b) (a c)) ((a b c)))</code></pre>
+        </sub>
+
+        <br />
+
+        <p>Réduire le cas d'une liste non vide <code>l</code> au cas de 
+            <code>(cdr l)</code> est l'essentiel du travail d'application du schéma 
+            de récursion, mais résoudre le cas de la liste vide est tout aussi important.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Exemples :</h3>
+
+        <ul>
+            <li><a href="chapter-09-ex-1.pdf" target="_blank">Inversion de fonction</a></li>
+            <li><a href="chapter-09-ex-2.pdf" target="_blank">Problème du prêt</a></li>
+            <li><a href="chapter-09-ex-3.pdf" target="_blank">Problème des Cavaliers</a></li>
+            <li><a href="chapter-09-ex-4.pdf" target="_blank">Problème des cruches</a></li>
+        </ul>
     </section>
 
     <div class="progress"></div>
