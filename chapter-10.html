@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Programmation Fonctionnelle. Chapitre 10 : Abstraction sur les données</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shower/themes/material/styles/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+        integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .shower {
+            --slide-ratio: calc(4 / 3);
+            --color-key: lightblue;
+            line-height: 1.3;
+        }
+
+        @page {
+            size: 1024px 768px;
+            border: 1px solid black;
+        }
+
+        .slide {
+            padding-left: 45px;
+            padding-right: 30px;
+            padding-top: 30px;
+        }
+
+        .slide ul,
+        .slide ol {
+            margin-left: 30px;
+        }
+
+        mjx-container[jax="CHTML"] {
+            color: blue;
+        }
+
+        .slide pre code {
+            line-height: 1.5;
+        }
+
+        pre[class*=language-] {
+            padding: 0px 5px;
+            overflow: hidden;
+        }
+
+        pre[class*=language-].input {
+            background-color: lightgoldenrodyellow;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].output {
+            background-color: ivory;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].error {
+            background-color: pink;
+            margin-top: 0px;
+        }
+
+        pre[class*=language-].info {
+            background-color: ivory;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        pre[class*=language-].info code {
+            color: magenta;
+        }
+
+        .specification {
+            border: 2px solid blue;
+            padding: 5px;
+            color: red;
+        }
+
+        .slide table {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide table tr td {
+            margin-left: 0px;
+            width: 100%;
+            table-layout: fixed;
+            border: none;
+        }
+
+        .slide th:first-child,
+        .slide td:first-child {
+            padding-left: 0px;
+        }
+
+        .slide th:last-child,
+        .slide td:last-child {
+            padding-right: 0px;
+        }
+    </style>
+</head>
+
+<body class="shower list">
+
+    <header class="caption">
+        <h1>Chapitre 10 : Abstraction sur les données</h1>
+        <p><sub>Cette présentation est basée sur les transparents de Prof. Dr. Em. Pascal Gribomont.</sub></p>
+    </header>
+
+    <section class="slide">
+        <h2>Chapitre 10 : Abstraction sur les données</h2>
+        <h3>Motivation</h3>
+        <p>Souvent, les données et résultats d’un même problème
+            peuvent se représenter concrètement (en machine) de plusieurs manières,
+            chacune pouvant avoir ses avantages. Changer de structures de données
+            concrètes implique de nombreuses modifications éparses dans les
+            programmes, sauf si le programmeur a “prévu le coup”.</p>
+
+        <h3>Exemple I</h3>
+        <p>On représentera le plus souvent un rationnel par une paire
+            d’entiers (num,den). On a deux possibilités : n’admettre que la forme
+            réduite (dénominateur positif, numérateur et dénominateur premiers entre
+            eux) ou autoriser aussi les formes non réduites. Dans le premier cas, il faut
+            décider si la réduction a lieu dès que le rationnel est construit, ou
+            seulement quand il est utilisé et/ou affiché.</p>
+    </section>
+
+    <section class="slide">
+        <h2>Chapitre 10 : Abstraction sur les données</h2>
+        <h3>Exemple II</h3>
+        <p>On représentera le plus souvent un polynôme tel que
+            $3x^5+2x^3-4x-7$ par une liste :</p>
+
+        <ul>
+            <li><code class="language-scheme">(3 0 2 0 -4 -7)</code>, ou</li>
+            <li><code class="language-scheme">((5 . 3) (3 . 2) (1 . -4) (0 . 7))</code></li>
+        </ul>
+
+        <p>La première solution est préférable pour les polynômes “pleins”, la
+            seconde pour les polynômes “creux”.</p>
+
+        <h3>Conclusion</h3>
+        <p>Mieux vaut laisser toutes les possibilités ouvertes, et
+            minimiser et localiser au mieux les fragments de programmes dépendant
+            de la représentation adoptée</p>
+    </section>
+
+    <section class="slide">
+        <h3>Principe</h3>
+    
+        <p>
+            On peut manipuler les listes au moyen d’un constructeur <code>cons</code> et
+            d’accesseurs <code>car</code> et <code>cdr</code>, sans savoir comment ces procédures
+            (et les listes elles-mêmes) sont réalisées.
+        </p>
+    
+        <p>
+            L’utilisateur peut aussi définir “axiomatiquement” des données abstraites,
+            en fixant d’abord les primitives : constructeur(s) et accesseur(s) ; ces
+            données sont alors réalisées en programmant les primitives.
+        </p>
+    
+        <p>
+            On peut imaginer par exemple les <em>rationnels abstraits</em>, basés sur le
+            constructeur <code>make-ratl</code> et les accesseurs <code>numr</code> et <code>denr</code>. 
+            On sait que, si $n$ et
+            $d$ sont des entiers $(d \neq 0)$, <code>(make-ratl n d)</code> 
+            est un rationnel égal à $n/d$ ;
+            d’autre part, si $r$ est un rationnel, alors les valeurs de <code>(numr r)</code> 
+            et <code>(denr r)</code>
+            sont les numérateur et dénominateur d’une fraction (réduite où non)
+            correspondant à $r$.
+        </p>
+    
+        <p>
+            On considère séparément les problèmes d’utilisation des rationnels (via le
+            constructeur <code>make-ratl</code> et les accesseurs <code>numr</code> et <code>denr</code>) et le problème de la
+            réalisation de ces derniers (en termes de primitives Scheme).
+        </p>
+    
+        <p>
+            On peut faire de même pour les polynômes. Un polynôme est, soit le
+            polynôme nul, soit la somme d’un monôme (degré et coe
+        </p>
+    </section>
+
+    <section class="slide">
+        <h3>Manipulation de rationnels abstraits I</h3>
+    
+        <p>Ces programmes seront valables, que l’on travaille avec des fractions
+            réduites ou non, et quel que soit le mode de représentation d’une fraction.</p>
+    
+        <sub><pre><code class="language-scheme">(define rzero?
+  (lambda (rtl) (zero? (numr rtl))))
+
+(define r+
+  (lambda (x y)
+    (make-ratl (+ (* (numr x) (denr y)) (* (numr y) (denr x)))
+               (* (denr x) (denr y)))))
+(define r*
+  (lambda (x y)
+    (make-ratl (* (numr x) (numr y))
+               (* (denr x) (denr y)))))
+
+(define r-
+  (lambda (x y)
+    (make-ratl (- (* (numr x) (denr y)) (* (numr y) (denr x)))
+               (* (denr x) (denr y)))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Manipulation de rationnels abstraits II</h3>
+        
+        <sub><pre><code class="language-scheme">(define rinvert
+  (lambda (rtl)
+    (if (rzero? rtl)
+        (error "rinvert: Cannot invert " rtl)
+        (make-ratl (denr rtl) (numr rtl)))))
+
+(define r/ (lambda (x y) (r* x (rinvert y))))
+
+(define r=
+  (lambda (x y) (= (* (numr x) (denr y)) (* (numr y) (denr x)))))
+
+(define rpositive?
+  (lambda (rtl)
+    (or (and (positive? (numr rtl)) (positive? (denr rtl)))
+        (and (negative? (numr rtl)) (negative? (denr rtl))))))
+
+(define r> (lambda (x y) (rpositive? (r- x y))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Manipulation de rationnels abstraits III</h3>
+        
+        <sub><pre><code class="language-scheme">(define max
+  (lambda (x y)
+    (if (> x y) x y)))
+
+(define rmax
+  (lambda (x y)
+    (if (r> x y) x y)))
+
+(define extreme-value
+  (lambda (pred x y)
+    (if (pred x y) x y)))
+
+(define rprint
+  (lambda (rtl)
+    (writeln (numr rtl) "/" (denr rtl)))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Représentation de rationnels abstraits I</h3>
+
+        <ul>
+            <li>Fractions non réduites</li>
+            <li>Réalisation en listes</li>
+        </ul>
+
+        <p><code>(12 18)</code> et <code>(2 3)</code> sont deux représentations correctes du rationnel $\frac{2}{3}$.</p>
+        
+        <sub><pre><code class="language-scheme">(define numr (lambda (rtl) (car rtl)))
+
+(define denr (lambda (rtl) (cadr rtl)))
+
+(define make-ratl
+  (lambda (int1 int2)
+    (if (zero? int2)
+        (error "make-ratl: The denominator cannot be zero.")
+        (list int1 int2))))</code></pre></sub>
+
+        <br />
+
+        <ul>            
+            <li>Avantage : procédures efficace.</li>
+            <li>Inconvénient : pas de forme normale unique.</li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Représentation de rationnels abstraits II</h3>
+
+        <ul>
+            <li>Fractions non réduites</li>
+            <li>Réalisation en paires pointées</li>
+        </ul>
+
+        <p><code>(12 . 18)</code> et <code>(2 . 3)</code> sont deux représentations correctes du rationnel $\frac{2}{3}$.</p>
+        
+        <sub><pre><code class="language-scheme">(define numr (lambda (rtl) (car rtl)))
+
+(define denr (lambda (rtl) (cdr rtl)))
+
+(define make-ratl
+  (lambda (int1 int2)
+    (if (zero? int2)
+        (error "make-ratl: The denominator cannot be zero.")
+        (cons int1 int2))))</code></pre></sub>
+
+        <br />
+
+        <ul>            
+            <li>Remarque : La représentation en paires pointées est plus économique,
+                et donc préférable à la représentation en listes.</li>
+        </ul>
+    </section>
+
+    <section class="slide">
+        <h3>Représentation de rationnels abstraits III</h3>
+
+        <ul>
+            <li>Fractions réduites</li>
+            <li>Réalisation en paires pointées</li>
+        </ul>
+
+        <h4>Première technique : changer le constructeur</h4>
+        
+        <sub><pre><code class="language-scheme">(define make-ratl
+  (lambda (int1 int2)
+    (if (zero? int2)
+        (error "make-ratl: The denominator cannot be zero.")
+        (let ((g (gcd int1 int2))) 
+          (cons (/ int1 g) (/ int2 g))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Représentation de rationnels abstraits IV</h3>
+
+        <ul>
+            <li>Fractions réduites</li>
+            <li>Réalisation en paires pointées</li>
+        </ul>
+
+        <h4>Deuxième technique : changer les accesseurs</h4>
+        
+        <sub><pre><code class="language-scheme">(define numr (lambda (rtl) (/ (car rtl) (gcd (car rtl) (cdr rtl)))))
+
+(define denr (lambda (rtl) (/ (cdr rtl) (gcd (car rtl) (cdr rtl)))))
+        </code></pre></sub>
+
+        <br />
+
+        <p>L’intervention de gcd (réduction) introduit une certaine perte d’efficacité, le plus souvent acceptable.</p>
+        
+        <p>La première technique (construction lente, accès rapide) est préférable si on accède souvent aux mêmes nombres.</p>
+    </section>
+
+    <div class="progress"></div>
+
+    <footer class="badge">
+        <p>2021-2022, Christophe Debruyne</p>
+    </footer>
+
+    <script src="shower/shower.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"
+        integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://{{cdn}}/prism@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"
+        integrity="sha512-xCfKr8zIONbip3Q1XG/u5x40hoJ0/DtP1bxyMEi0GWzUFoUffE+Dfw1Br8j55RRt9qG7bGKsh+4tSb1CvFHPSA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+
+</html>
