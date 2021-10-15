@@ -339,14 +339,378 @@
         
         <sub><pre><code class="language-scheme">(define numr (lambda (rtl) (/ (car rtl) (gcd (car rtl) (cdr rtl)))))
 
-(define denr (lambda (rtl) (/ (cdr rtl) (gcd (car rtl) (cdr rtl)))))
-        </code></pre></sub>
+(define denr (lambda (rtl) (/ (cdr rtl) (gcd (car rtl) (cdr rtl)))))</code></pre></sub>
 
         <br />
 
         <p>L’intervention de gcd (réduction) introduit une certaine perte d’efficacité, le plus souvent acceptable.</p>
         
         <p>La première technique (construction lente, accès rapide) est préférable si on accède souvent aux mêmes nombres.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Le type abstrait “polynôme”</h3>
+    
+        <p>Type récursif ; un polynôme comporte : un <em>degré</em>, un <em>coefficient du terme de plus haut degré</em>, un
+            <em>reste</em> (qui est un polynôme).</p>
+        
+        <p>Le type abstrait “polynôme” comportera donc une constante de base (polynôme nul), un constructeur `a trois
+            arguments et trois accesseurs à un argument.</p>
+        
+        <p>Constante de base : <code>the-zero-poly</code></p>
+    
+        <p>Un constructeur (trois arguments) : <code>poly-cons</code></p>
+            
+        <p>Trois accesseurs : <code>degree</code>, <code>lead-coeff</code>, <code>rest-poly</code></p>
+    
+        <p>On distinguera les problèmes d’<em>utilisation</em> du type “polynôme” et le problème de <emd>réalisation</emd> 
+            de ce type. Le second problème revient à programmer la constante de base, 
+            le constructeur et les accesseurs.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Polynôme nul et monômes</h3>
+    
+        <p>Reconnaisseur pour la constante de base :</p>
+
+        <pre><code class="language-scheme">(define zero-poly?
+  (lambda (poly)
+    (and (zero? (degree poly)) (zero? (lead-coef poly)))))</code></pre>
+
+        <p>Un monôme est un polynôme de reste nul :</p>
+        
+        <pre><code class="language-scheme">(define make-mono
+  (lambda (deg coef) (poly-cons deg coef the-zero-poly)))</code></pre>
+
+        <p>Le monôme principal d’un polynôme est son monôme de degré le plus élevé (égal au degré du polynôme) :</p>
+
+        <pre><code class="language-scheme">(define lead-mono
+  (lambda (poly) (make-mono (degree poly) (lead-coef poly))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Addition de polynômes</h3>
+    
+        <pre><code class="language-scheme">(define p+
+  (lambda (poly1 poly2)
+    (cond ((zero-poly? poly1) poly2)
+          ((zero-poly? poly2) poly1)
+          (else
+           (let ((n1 (degree poly1)) (n2 (degree poly2))
+                 (a1 (lead-coef poly1)) (a2 (lead-coef poly2))
+                 (r1 (rest-poly poly1)) (r2 (rest-poly poly2)))
+             (cond ((&gt; n1 n2) (poly-cons n1 a1 (p+ r1 poly2)))
+                   ((&lt; n1 n2) (poly-cons n2 a2 (p+ poly1 r2)))
+                   (else (poly-cons n1 (+ a1 a2) (p+ r1 r2)))))))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Multiplication de polynômes</h3>
+    
+        <sub><pre><code class="language-scheme">(define p*
+  (letrec
+    ((t* (lambda (mono poly)
+           (if (zero-poly? poly)
+               the-zero-poly
+               (poly-cons
+                 (+ (degree mono) (degree poly))
+                 (* (lead-coef mono) (lead-coef poly))
+                 (t* mono (rest-poly poly)))))))
+    (lambda (poly1 poly2)
+      (if (zero-poly? poly1)
+          the-zero-poly
+          (p+ (t* (lead-mono poly1) poly2)
+              (p* (rest-poly poly1) poly2))))))
+
+(define negative-poly
+  (lambda (poly) (p* (make-mono 0 -1) poly)))
+
+(define p-
+  (lambda (poly1 poly2) (p+ poly1 (negative-poly poly2))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Evaluation de polynômes</h3>
+    
+        <sub><pre><code class="language-scheme">(define poly-value
+  (lambda (poly num)
+    (let ((n (degree poly)))
+      (if (zero? n)
+          (lead-coef poly)
+          (let ((rest (rest-poly poly)))
+            (if (&lt; (degree rest) (sub1 n))
+                (poly-value
+                  (poly-cons (sub1 n) (* num (lead-coef poly)) rest)
+                  num)
+                (poly-value
+                  (poly-cons
+                    (sub1 n)
+                    (+ (* num (lead-coef poly)) (lead-coef rest))
+                    (rest-poly rest))
+                  num)))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Première réalisation (constante, accesseurs)</h3>
+
+        <p>$2x^3+3x-1$ devient <code>(2 0 3 -1)</code></p>
+
+        <p>$2x^1000+3x-1$ devient <code>(2 0 ... 0 3 -1)</code> (1001 termes !)</p>
+    
+        <sub><pre><code class="language-scheme">(define the-zero-poly '(0))
+
+(define degree (lambda (poly) (sub1 (length poly))))
+
+(define lead-coef (lambda (poly) (car poly)))
+
+(define rest-poly
+  (lambda (poly)
+    (cond ((zero? (degree poly)) the-zero-poly)
+          ((zero? (lead-coef (cdr poly))) (rest-poly (cdr poly)))
+          (else (cdr poly)))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Première réalisation (constructeur)</h3>
+    
+        <sub><pre><code class="language-scheme">(define poly-cons
+  (lambda (deg coef poly)
+    (let ((dp (degree poly)))
+      (cond ((and (zero? deg) (equal? poly the-zero-poly))
+             (list coef))
+            ((&lt; dp deg)
+             (if (zero? coef)
+                 poly
+                 (cons coef
+                   (append (lz (sub1 (- deg dp))) poly))))
+            (else
+             (error "poly-cons: Degree too high in" poly))))))
+             
+(define lz (lambda (n) (if (zero? n) '() (cons 0 (lz (sub1 n))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Seconde réalisation (constante, accesseurs)</h3>
+
+        <p>$2x^3+3x-1$ devient <code>((3 2) (1 3) (0 -1))</code></p>
+
+        <p>$2x^1000+3x-1$ devient <code>((1000 2) (1 3) (0 -1))</code></p>
+    
+        <sub><pre><code class="language-scheme">(define the-zero-poly '((0 0)))
+            
+(define degree (lambda (poly) (caar poly)))
+
+(define lead-coef (lambda (poly) (cadar poly)))
+
+(define rest-poly
+  (lambda (poly)
+    (if (null? (cdr poly)) the-zero-poly (cdr poly))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Seconde réalisation (constructeur)</h3>
+    
+        <sub><pre><code class="language-scheme">(define poly-cons
+  (lambda (deg coef poly)
+    (let ((dp (degree poly)))
+      (cond
+        ((and (zero? deg) (equal? poly the-zero-poly))
+         (list (list deg coef)))
+        ((&lt; dp deg)
+         (if (zero? coef) poly (cons (list deg coef) poly)))
+        (else
+         (error "poly-cons: degree too high in" poly))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Entrée / sortie, conversion I</h3>
+    
+        <sub><pre><code class="language-scheme">(define digits-&gt;poly ;; liste de coefficients vers polynôme 
+  (lambda (digit-list)
+    (if (null? digit-list)
+        (error "digits-&gt;poly: Not defined for" digit-list)
+        (letrec
+          ((make-poly
+            (lambda (deg ls)
+              (if (null? ls)
+                  the-zero-poly
+                  (poly-cons deg
+                             (car ls)
+                             (make-poly (sub1 deg) (cdr ls)))))))
+          (make-poly (sub1 (length digit-list)) digit-list)))))</code></pre></sub>
+
+        <p>Le résultat affiché dépend du mode de représentation mais le texte du programme n’en dépend pas.</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (digits-&gt;poly '(1 2 3 4))  ;; avec la première version</code></pre>
+        <pre class="output"><code class="language-">(1 2 3 4)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (digits-&gt;poly '(1 2 3 4))  ;; avec la deuxième version</code></pre>
+        <pre class="output"><code class="language-">((3 1) (2 2) (1 3) (0 4))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Entrée / sortie, conversion II</h3>
+    
+        <sub><pre><code class="language-scheme">(define poly-&gt;digits ;; polynôme vers liste de coefficients 
+  (lambda (poly)
+    (letrec
+      ((convert
+         (lambda (p d)
+           (cond
+             ((zero? d)
+              (list (lead-coef p)))
+             ((= (degree p) d)
+              (cons (lead-coef p) (convert (rest-poly p) (sub1 d))))
+             (else
+              (cons 0 (convert p (sub1 d))))))))
+      (convert poly (degree poly)))))</code></pre></sub>
+
+        <p>La donnée entrée dépend du mode de représentation mais le texte du programme n’en dépend pas.</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (poly-&gt;digits '(1 2 3 4))  ;; avec la première version</code></pre>
+        <pre class="output"><code class="language-">(1 2 3 4)</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (poly-&gt;digits '((3 1) (2 2) (1 3) (0 4)))  ;; avec la deuxième version</code></pre>
+        <pre class="output"><code class="language-">(1 2 3 4)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Changement de base numérique I</h3>
+
+        <p>Conversion entre décimal et “n-aire codé décimal”.</p>
+    
+        <sub><pre><code class="language-scheme">(define n-ary-&gt;dec
+  (lambda (n digits) (poly-value (digits-&gt;poly digits) n)))
+
+(define dec-&gt;n-ary
+  (lambda (n num)
+    (letrec
+      ((dec-&gt;bin
+         (lambda (m d)
+           (if (zero? m)
+               the-zero-poly
+               (p+ (make-mono d (remainder m n))
+                   (dec-&gt;bin (quotient m n) (add1 d)))))))
+      (poly-&gt;digits (dec-&gt;bin num 0)))))</code></pre></sub>
+
+        <sub>
+            <pre class=""><code class="language-">;; 256 = 1*2^8 = 9*27 + 13</code></pre>
+            <div class="columns two">
+                <div>
+                    <pre class="input"><code class="language-scheme">&gt; (dec-&gt;n-ary 2 256)</code></pre>
+                    <pre class="output"><code class="language-">(1 0 0 0 0 0 0 0 0)</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (n-ary-&gt;dec 2 '(1 0 0 0 0 0 0 0 0))</code></pre>
+                    <pre class="output"><code class="language-">256</code></pre>
+                </div>
+                <div>
+                    <pre class="input"><code class="language-scheme">&gt; (dec-&gt;n-ary 27 256)</code></pre>
+                    <pre class="output"><code class="language-">(9 13)</code></pre>
+                    <pre class="input"><code class="language-scheme">&gt; (n-ary-&gt;dec 27 '(9 13))</code></pre>
+                    <pre class="output"><code class="language-">256</code></pre>
+                </div>
+            </div>
+        </sub>
+    </section>
+
+    <section class="slide">
+        <h3>Changement de base numérique II</h3>
+
+        <p>Conversion de p-aire en q-aire (codés décimal)</p>
+    
+        <pre><code class="language-scheme">(define p-ary-&gt;q-ary
+  (lambda (p q digits)
+    (dec-&gt;n-ary q (n-ary-&gt;dec p digits))))</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 27 2 ’(9 13))</code></pre>
+        <pre class="output"><code class="language-">(1 0 0 0 0 0 0 0 0)</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 2 27 ’(1 0 0 0 0 0 0 0 0))</code></pre>
+        <pre class="output"><code class="language-">(9 13)</code></pre>
+        
+        <p>Autre exemple : $5 * 13^3 +3*13^2 +1 = 2*17^3 +5*17^2 +13*17+1 = 11493$.</p>
+
+        <pre class="input"><code class="language-scheme">&gt; (p-ary&gt;q-ary 13 17 '(5 3 0 1))</code></pre>
+        <pre class="output"><code class="language-">(2 5 13 1)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires complètement étiquetés I</h3>
+
+        <p>Un <em>K-arbre binaire complètement étiqueté</em> est soit l’arbre vide, soit un triplet comportant une clef (“key”)
+            élément de K, un sous-arbre de gauche et un sous-arbre de droite. On aura donc un constructeur sans argument pour
+            l’arbre vide et un constructeur à trois arguments pour les arbres non vides ; on aura également trois accesseurs.
+        </p>
+
+        <p>Exemple, $K = \mathbb{N}$</p>
+
+        <div><img src="./chapter-10/tree.png" width="40%" alt="Un arbre binaires complètement étiqueté." /></div>
+
+        <p>Représentation concrète simple : liste de trois éléments.</p>
+    
+        <pre><code class="language-scheme">(define conc-tree '(4 (2 (1 () ()) ()) (5 (3 () ()) (7 () ()))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires complètement étiquetés II</h3>
+    
+        <pre><code class="language-scheme">(define conc-tree '(4 (2 (1 () ()) ()) (5 (3 () ()) (7 () ()))))
+                   |  |  |       |   | |  |       | |       |||
+                   |  |  ---------   | |  --------- ---------||
+                   |  ---------------- -----------------------|
+                   --------------------------------------------</code></pre>
+
+        <br />
+
+        <div><img src="./chapter-10/image.png" width="100%" alt="Box-and-pointer diagram de l'arbre." /></div>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires complètement étiquetés III</h3>
+    
+        <p>Constructeurs :</p>
+        <sub><pre><code class="language-scheme">(define mk-e-tree (lambda () '()))
+(define mk-k-tree (lambda (k l r) (list k l r)))</code></pre></sub>
+
+        <p>Reconnaisseurs :</p>
+
+        <sub><pre><code class="language-scheme">(define e-tree? null?)
+(define k-tree?
+  (lambda (x)  ;; x est un objet quelconque
+    (and (pair? x) (key? (car x))
+         (pair? (cdr x)) (ek-tree? (cadr x))
+         (pair? (cddr x)) (ek-tree? (caddr x))
+         (null? (cdddr x)))))
+(define ek-tree? (lambda (x) (or (e-tree? x) (k-tree? x))))
+(define key? (lambda (x) (and (integer? x) (&gt;= x 0))))</code></pre></sub>
+
+        <p>Accesseurs :</p>
+
+        <sub><pre><code class="language-scheme">(define key car)
+(define left cadr)
+(define right caddr)</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires complètement étiquetés IV</h3>
+    
+        <p>Représentations concrète et abstraite :</p>
+
+        <pre><code class="language-scheme">(define conc-tree '(4 (2 (1 () ()) ()) (5 (3 () ()) (7 () ()))))</code></pre>
+
+        <pre><code class="language-scheme">(define abst-tree
+  (mk-k-tree 4
+             (mk-k-tree 2
+                        (mk-k-tree 1
+                                   (mk-e-tree)
+                                   (mk-e-tree))
+                        (mk-e-tree))
+             (mk-k-tree 5
+                        (mk-k-tree 3
+                                   (mk-e-tree)
+                                   (mk-e-tree))
+                        (mk-k-tree 7
+                                   (mk-e-tree)
+                                   (mk-e-tree)))))</code></pre>
+
     </section>
 
     <div class="progress"></div>
