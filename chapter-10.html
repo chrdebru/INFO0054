@@ -113,15 +113,15 @@
     <section class="slide">
         <h2>Chapitre 10 : Abstraction sur les données</h2>
         <h3>Motivation</h3>
-        <p>Souvent, les données et résultats d’un même problème
+        <p>Souvent, les données et résultats d'un même problème
             peuvent se représenter concrètement (en machine) de plusieurs manières,
             chacune pouvant avoir ses avantages. Changer de structures de données
             concrètes implique de nombreuses modifications éparses dans les
-            programmes, sauf si le programmeur a “prévu le coup”.</p>
+            programmes, sauf si le programmeur a "prévu le coup".</p>
 
         <h3>Exemple I</h3>
         <p>On représentera le plus souvent un rationnel par une paire
-            d’entiers (num,den). On a deux possibilités : n’admettre que la forme
+            d'entiers (num,den). On a deux possibilités : n'admettre que la forme
             réduite (dénominateur positif, numérateur et dénominateur premiers entre
             eux) ou autoriser aussi les formes non réduites. Dans le premier cas, il faut
             décider si la réduction a lieu dès que le rationnel est construit, ou
@@ -129,7 +129,6 @@
     </section>
 
     <section class="slide">
-        <h2>Chapitre 10 : Abstraction sur les données</h2>
         <h3>Exemple II</h3>
         <p>On représentera le plus souvent un polynôme tel que
             $3x^5+2x^3-4x-7$ par une liste :</p>
@@ -139,8 +138,8 @@
             <li><code class="language-scheme">((5 . 3) (3 . 2) (1 . -4) (0 . 7))</code></li>
         </ul>
 
-        <p>La première solution est préférable pour les polynômes “pleins”, la
-            seconde pour les polynômes “creux”.</p>
+        <p>La première solution est préférable pour les polynômes "pleins", la
+            seconde pour les polynômes "creux".</p>
 
         <h3>Conclusion</h3>
         <p>Mieux vaut laisser toutes les possibilités ouvertes, et
@@ -152,14 +151,14 @@
         <h3>Principe</h3>
     
         <p>
-            On peut manipuler les listes au moyen d’un constructeur <code>cons</code> et
-            d’accesseurs <code>car</code> et <code>cdr</code>, sans savoir comment ces procédures
+            On peut manipuler les listes au moyen d'un constructeur <code>cons</code> et
+            d'accesseurs <code>car</code> et <code>cdr</code>, sans savoir comment ces procédures
             (et les listes elles-mêmes) sont réalisées.
         </p>
     
         <p>
-            L’utilisateur peut aussi définir “axiomatiquement” des données abstraites,
-            en fixant d’abord les primitives : constructeur(s) et accesseur(s) ; ces
+            L'utilisateur peut aussi définir "axiomatiquement" des données abstraites,
+            en fixant d'abord les primitives : constructeur(s) et accesseur(s) ; ces
             données sont alors réalisées en programmant les primitives.
         </p>
     
@@ -169,29 +168,29 @@
             On sait que, si $n$ et
             $d$ sont des entiers $(d \neq 0)$, <code>(make-ratl n d)</code> 
             est un rationnel égal à $n/d$ ;
-            d’autre part, si $r$ est un rationnel, alors les valeurs de <code>(numr r)</code> 
+            d'autre part, si $r$ est un rationnel, alors les valeurs de <code>(numr r)</code> 
             et <code>(denr r)</code>
-            sont les numérateur et dénominateur d’une fraction (réduite où non)
+            sont les numérateur et dénominateur d'une fraction (réduite où non)
             correspondant à $r$.
         </p>
     
         <p>
-            On considère séparément les problèmes d’utilisation des rationnels (via le
+            On considère séparément les problèmes d'utilisation des rationnels (via le
             constructeur <code>make-ratl</code> et les accesseurs <code>numr</code> et <code>denr</code>) et le problème de la
             réalisation de ces derniers (en termes de primitives Scheme).
         </p>
     
         <p>
             On peut faire de même pour les polynômes. Un polynôme est, soit le
-            polynôme nul, soit la somme d’un monôme (degré et coe
+            polynôme nul, soit la somme d'un monôme (degré et coe
         </p>
     </section>
 
     <section class="slide">
         <h3>Manipulation de rationnels abstraits I</h3>
     
-        <p>Ces programmes seront valables, que l’on travaille avec des fractions
-            réduites ou non, et quel que soit le mode de représentation d’une fraction.</p>
+        <p>Ces programmes seront valables, que l'on travaille avec des fractions
+            réduites ou non, et quel que soit le mode de représentation d'une fraction.</p>
     
         <sub><pre><code class="language-scheme">(define rzero?
   (lambda (rtl) (zero? (numr rtl))))
@@ -343,18 +342,18 @@
 
         <br />
 
-        <p>L’intervention de gcd (réduction) introduit une certaine perte d’efficacité, le plus souvent acceptable.</p>
+        <p>L'intervention de gcd (réduction) introduit une certaine perte d'efficacité, le plus souvent acceptable.</p>
         
         <p>La première technique (construction lente, accès rapide) est préférable si on accède souvent aux mêmes nombres.</p>
     </section>
 
     <section class="slide">
-        <h3>Le type abstrait “polynôme”</h3>
+        <h3>Le type abstrait "polynôme"</h3>
     
         <p>Type récursif ; un polynôme comporte : un <em>degré</em>, un <em>coefficient du terme de plus haut degré</em>, un
             <em>reste</em> (qui est un polynôme).</p>
         
-        <p>Le type abstrait “polynôme” comportera donc une constante de base (polynôme nul), un constructeur `a trois
+        <p>Le type abstrait "polynôme" comportera donc une constante de base (polynôme nul), un constructeur à trois
             arguments et trois accesseurs à un argument.</p>
         
         <p>Constante de base : <code>the-zero-poly</code></p>
@@ -363,7 +362,7 @@
             
         <p>Trois accesseurs : <code>degree</code>, <code>lead-coeff</code>, <code>rest-poly</code></p>
     
-        <p>On distinguera les problèmes d’<em>utilisation</em> du type “polynôme” et le problème de <emd>réalisation</emd> 
+        <p>On distinguera les problèmes d'<em>utilisation</em> du type "polynôme" et le problème de <emd>réalisation</emd> 
             de ce type. Le second problème revient à programmer la constante de base, 
             le constructeur et les accesseurs.</p>
     </section>
@@ -382,7 +381,7 @@
         <pre><code class="language-scheme">(define make-mono
   (lambda (deg coef) (poly-cons deg coef the-zero-poly)))</code></pre>
 
-        <p>Le monôme principal d’un polynôme est son monôme de degré le plus élevé (égal au degré du polynôme) :</p>
+        <p>Le monôme principal d'un polynôme est son monôme de degré le plus élevé (égal au degré du polynôme) :</p>
 
         <pre><code class="language-scheme">(define lead-mono
   (lambda (poly) (make-mono (degree poly) (lead-coef poly))))</code></pre>
@@ -539,7 +538,7 @@
                              (make-poly (sub1 deg) (cdr ls)))))))
           (make-poly (sub1 (length digit-list)) digit-list)))))</code></pre></sub>
 
-        <p>Le résultat affiché dépend du mode de représentation mais le texte du programme n’en dépend pas.</p>
+        <p>Le résultat affiché dépend du mode de représentation mais le texte du programme n'en dépend pas.</p>
 
         <pre class="input"><code class="language-scheme">&gt; (digits-&gt;poly '(1 2 3 4))  ;; avec la première version</code></pre>
         <pre class="output"><code class="language-">(1 2 3 4)</code></pre>
@@ -565,7 +564,7 @@
               (cons 0 (convert p (sub1 d))))))))
       (convert poly (degree poly)))))</code></pre></sub>
 
-        <p>La donnée entrée dépend du mode de représentation mais le texte du programme n’en dépend pas.</p>
+        <p>La donnée entrée dépend du mode de représentation mais le texte du programme n'en dépend pas.</p>
 
         <pre class="input"><code class="language-scheme">&gt; (poly-&gt;digits '(1 2 3 4))  ;; avec la première version</code></pre>
         <pre class="output"><code class="language-">(1 2 3 4)</code></pre>
@@ -577,7 +576,7 @@
     <section class="slide">
         <h3>Changement de base numérique I</h3>
 
-        <p>Conversion entre décimal et “n-aire codé décimal”.</p>
+        <p>Conversion entre décimal et "n-aire codé décimal".</p>
     
         <sub><pre><code class="language-scheme">(define n-ary-&gt;dec
   (lambda (n digits) (poly-value (digits-&gt;poly digits) n)))
@@ -621,9 +620,9 @@
   (lambda (p q digits)
     (dec-&gt;n-ary q (n-ary-&gt;dec p digits))))</code></pre>
 
-        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 27 2 ’(9 13))</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 27 2 '(9 13))</code></pre>
         <pre class="output"><code class="language-">(1 0 0 0 0 0 0 0 0)</code></pre>
-        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 2 27 ’(1 0 0 0 0 0 0 0 0))</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (p-ary-&gt;q-ary 2 27 '(1 0 0 0 0 0 0 0 0))</code></pre>
         <pre class="output"><code class="language-">(9 13)</code></pre>
         
         <p>Autre exemple : $5 * 13^3 +3*13^2 +1 = 2*17^3 +5*17^2 +13*17+1 = 11493$.</p>
@@ -635,9 +634,9 @@
     <section class="slide">
         <h3>Arbres binaires complètement étiquetés I</h3>
 
-        <p>Un <em>K-arbre binaire complètement étiqueté</em> est soit l’arbre vide, soit un triplet comportant une clef (“key”)
+        <p>Un <em>K-arbre binaire complètement étiqueté</em> est soit l'arbre vide, soit un triplet comportant une clef ("key")
             élément de K, un sous-arbre de gauche et un sous-arbre de droite. On aura donc un constructeur sans argument pour
-            l’arbre vide et un constructeur à trois arguments pour les arbres non vides ; on aura également trois accesseurs.
+            l'arbre vide et un constructeur à trois arguments pour les arbres non vides ; on aura également trois accesseurs.
         </p>
 
         <p>Exemple, $K = \mathbb{N}$</p>
@@ -710,8 +709,544 @@
                         (mk-k-tree 7
                                    (mk-e-tree)
                                    (mk-e-tree)))))</code></pre>
-
     </section>
+
+    <section class="slide">
+        <h3>Arbres binaires complètement étiquetés V</h3>
+    
+        <p>Présence d'un nombre entier donné dans un $\mathbb{N}$-arbre donné :</p>
+
+        <pre><code class="language-scheme">(define in-tree?
+  (lambda (i tr)
+    (if (e-tree? tr)
+        #f
+        (or (= i (key tr))
+            (in-tree? i (left tr))
+            (in-tree? i (right tr))))))</code></pre>
+
+        <p>Ceci peut se récrire en :</p>
+
+        <pre><code class="language-scheme">(define in-tree?
+  (lambda (i tr)
+    (and (not (e-tree? tr))
+         (or (= i (key tr))
+             (in-tree? i (left tr))
+             (in-tree? i (right tr))))))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés I</h3>
+    
+        <p>Un arbre non vide est dit <em>conditionné</em> ou <em>ordonné</em> si la clef de tout nœud interne est plus
+            grande ou égale aux clefs de tous ses descendants de gauche, et plus petite ou égale aux clefs de tous ses
+            descendants de droite.</p>
+        <p>Deux écueils à éviter :</p>
+        <ul>
+            <li>L'approche "naïve" : Un arbre non vide serait conditionné si la clef de la racine est comprise entre les
+                clefs des deux fils (s'il existent) et si les deux sous-arbres fils sont eux-mêmes conditionnés. La
+                condition est nécessaire mais pas suffisante (voir exemple) ! ! !</li>
+            <li>L'approche "prudente" : un arbre non vide serait conditionné si la clef de la racine est supérieure à tous
+                ses descendants de gauche et inférieure à tous ses descendants de droite et si les deux sous-arbres fils
+                sont eux-mêmes conditionnés. La méthode est inefficace, parce que les mêmes comparaisons sont répétées
+                plusieurs fois.</li>
+        </ul>
+        <p>En fait, un arbre est conditionné si ses deux fils sont conditionnés et si sa racine est supérieure à tous les
+            éléments de la branche la plus à droite du fils gauche, et inférieure à tous les éléments de la branche la plus
+            à gauche du fils droit.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés II</h3>
+    
+        <p>Les prédicats auxiliaires <code>greq?</code> et <code>leeq?</code> testent les deux dernières conditions.</p>
+
+        <pre><code class="language-scheme">(define greq?
+  (lambda (n tr)
+    (or (e-tree? tr) (and (&gt;= n (key tr)) (greq? n (right tr))))))
+
+(define leeq?
+  (lambda (n tr)
+    (or (e-tree? tr) (and (&lt;= n (key tr)) (leeq? n (left tr))))))
+
+(define condit-1?
+  (lambda (tr)
+    (or (e-tree? tr)
+        (and (condit-1? (left tr)) (greq? (key tr) (left tr))
+             (condit-1? (right tr)) (leeq? (key tr) (right tr))))))</code></pre>
+
+        <p>Ce programme n'est pas optimal ; une version plus efficace est possible si on dispose d'une borne supérieure *max*
+            absolue pour les étiquettes des arbres.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés III</h3>
+    
+        <div><img src="./chapter-10/nc.png" width="30%" alt="Un arbre binaires non-conditionnés." /></div>
+
+        <pre class="input"><code class="language-scheme">&gt; (condit-1? '(4 (2 (1 () ()) ()) (5 (3 () ()) (7 () ()))))</code></pre>
+        <pre class="output"><code class="language-">#f</code></pre>
+
+        <div><img src="./chapter-10/yc.png" width="30%" alt="Un arbre binaires conditionnés." /></div>
+
+        <pre class="input"><code class="language-scheme">&gt; (condit-1? '(5 (2 (1 () ()) ()) (7 (6 () ()) (8 () ()))))</code></pre>
+        <pre class="output"><code class="language-">#t</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés IV</h3>
+    
+        <p>Version efficace :</p>
+
+        <pre><code class="language-scheme">(define condit-2?
+  (lambda (tr) (or (e-tree? tr) (tree-ok? 0 tr *max*))))
+
+(define tree-ok?
+  (lambda (min tr max)
+    (and (&lt;= min (key tr))
+         (&gt;= max (key tr))
+         (or (e-tree? (left tr)) (tree-ok? min (left tr) (key tr)))
+         (or (e-tree? (right tr)) (tree-ok? (key tr) (right tr) max)))))</code></pre>
+
+        <br />
+
+        <p class="specification"><code>tr</code> est un arbre conditionné dont toutes 
+            les clefs sont comprises entre les naturels <code>min</code> et <code>max</code>
+            ssi <code>(tree-ok? min tr max)</code> est vrai.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés V</h3>
+    
+        <p>Si un arbre est conditionné, la liste de ses étiquettes est triée, à condition que dans cette liste toute
+           étiquette se trouve entre les étiquettes de ses descendants de gauche et celles de ses descendants de droite.</p>
+
+        <p>La fonction <code>traversal</code> calcule cette liste :</p>
+
+        <pre><code class="language-scheme">(define traversal
+  (lambda (tr)
+    (if (e-tree? tr)
+        '()
+        (append (traversal (left tr))
+                (cons (key tr)
+                      (traversal (right tr)))))))</code></pre>
+
+        <pre class="input"><code class="language-scheme">&gt; (traversal '(5 (2 (1 () ()) ()) (7 (6 () ()) (8 () ()))))</code></pre>
+        <pre class="output"><code class="language-">(1 2 5 6 7 8)</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres binaires conditionnés VI</h3>
+    
+        <p>On peut utiliser la technique des accumulateurs pour éviter l'usage de append, en écrivant une fonction auxiliaire <code>trav-a</code> telle que [[<code>(trav-a tr acc)</code>]] soit égal à [[<code>(append (traversal tr) acc)</code>]].</p>
+
+        <pre><code class="language-scheme">(define trav-a
+  (lambda (tr acc)
+    (if (e-tree? tr)
+        acc
+        (trav-a (left tr)
+                (cons (key tr)
+                      (trav-a (right tr) acc))))))
+
+(define traversal
+  (lambda (tr) (trav-a tr '())))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri I</h3>
+    
+        <p>Une arbre est un tas si l'étiquette d'un nœud est supérieure aux étiquettes de ses descendants. La notion de tas est
+            utile dans diverses applications. Le programme <code>heap?</code> teste si un arbre est un tas ("heap" en anglais) ;
+            il est analogue au programme <code>condit-2</code>.</p>
+
+        <p>Les règles de portée empêchent toute confusion entre les liaisons locales et globales de <code>key</code>,
+            <code>left</code> et <code>right</code> ; les liaisons locales sont des arbres, les liaisons globales sont des
+            accesseurs.</p>
+        
+        <pre><code class="language-scheme">(define heap?
+  (lambda (tr)
+    (or (e-tree? tr)
+        (let ((key (key tr)) (left (left tr)) (right (right tr)))
+          (and (greq? key left) (greq? key right)
+               (heap? left) (heap? right))))))
+
+; (greq? n tr) : (or (e-tree? tr) (&gt;= n (key tr))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri II</h3>
+    
+        <p>Transformation d'un arbre en un tas</p>
+        
+        <sub><pre><code class="language-scheme">(define adjust
+  (lambda (ky lh rh)
+    (cond
+      ((and (greq? ky lh) (greq? ky rh)) (mk-k-tree ky lh rh))
+      ((greq? ky lh)
+       (let ((krh (key rh)) (lrh (left rh)) (rrh (right rh)))
+         (mk-k-tree krh lh (adjust ky lrh rrh))))
+      ((greq? ky rh)
+       (let ((klh (key lh)) (llh (left lh)) (rlh (right lh)))
+         (mk-k-tree klh (adjust ky llh rlh) rh)))
+      (else
+       (let ((klh (key lh)) (krh (key rh)))
+         (let ((llh (left lh)) (rlh (right lh))
+               (lrh (left rh)) (rrh (right rh)))
+           (if (> klh krh)
+               (mk-k-tree klh (adjust ky llh rlh) rh)
+               (mk-k-tree krh lh (adjust ky lrh rrh)))))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri III</h3>
+    
+        <p>Transformation d'un arbre en un tas</p>
+        
+        <sub><pre><code class="language-scheme">(define heapify
+  (lambda (tr)
+    (if (e-tree? tr)
+        tr
+        (let ((key (key tr)) (left (left tr)) (right (right tr)))
+          (let ((lh (heapify left)) (rh (heapify right)))
+    (adjust key lh rh))))))</code></pre></sub>
+
+        <pre class="input"><code class="language-scheme">&gt; (heapify '(5 (2 (1 () ()) ()) (7 (6 () ()) (8 () ()))))</code></pre>
+        <pre class="output"><code class="language-">(8 (2 (1 () ()) ()) (7 (6 () ()) (5 () ())))</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (adjust 9 '(3 () (4 () ())) '(6 () ()))</code></pre>
+        <pre class="output"><code class="language-">(9 (3 () (4 () ())) (6 () ()))</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (adjust 5 '(3 () (4 () ())) '(6 () ()))</code></pre>
+        <pre class="output"><code class="language-">(6 (3 () (4 () ())) (5 () ()))</code></pre>
+        <pre class="input"><code class="language-scheme">&gt; (adjust 2 '(3 () (4 () ())) '(6 () ()))</code></pre>
+        <pre class="output"><code class="language-">(6 (3 () (4 () ())) (2 () ()))</code></pre>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri IV</h3>
+    
+        <p>Si dans la liste des étiquettes d'un tas, l'étiquette d'un nœud vient toujours avant 
+            l'étiquette des descendants de
+            ce nœud, alors la liste est "presque" triée par ordre décroissant. 
+            Une variante du prédicat <code>traversal</code> permet de le
+            vérifier. Nous écrivons cette variante en utilisant un <code>letrec</code> et un accumulateur :</p>
+        
+        <sub><pre><code class="language-scheme">(define pre-trav
+  (lambda (tr)
+    (letrec
+      ((pre-trav-a
+        (lambda (tr acc)
+          (if (e-tree? tr)
+              acc
+              (cons (key tr)
+                    (pre-trav-a (left tr) (pre-trav-a (right tr) acc)))))))
+      (pre-trav-a tr '()))))</code></pre></sub>
+
+      <br />
+      
+      <p>Exercice : spécifier la fonction auxiliaire</p>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri V</h3>
+    
+        <div class="columns two">
+            <div>
+                <p>Considérons l'arbre dont la représentation concrète est</p>
+                
+                <sub><pre><code class="language-">(5 (3 (5 (3 () (5 (4 () (7 () ())) (3 () ()))) (6 () ()))
+      (4 (5 (3 () (4 () ())) (6 () ())) ()))
+   (6 () (5 (4 () (7 () ())) (3 () ()))))</code></pre></sub><br />
+                <p><code>heapify</code> transforme cet arbre en le tas</p>
+                <sub><pre><code class="language-">(7 (7 (6 (5 () (5 (4 () (3 () ())) (3 () ()))) (3 () ()))
+      (6 (5 (4 () (3 () ())) (4 () ())) ()))
+   (6 () (5 (5 () (4 () ())) (3 () ()))))</code></pre></sub>
+                <p>qui a même structure ; <code>pre-trav</code> fournit les listes</p>
+                <sub><pre><code class="language-">(3 4 7 5 3 5 6 3 3 4 5 6 4 5 6 4 7 5 3)
+(7 7 6 5 5 4 3 3 3 6 5 4 3 4 6 5 5 4 3)</code></pre></sub>
+                <p>alors que la version triée de ces deux listes est</p>
+                <sub><pre><code class="language-">(7 7 6 6 6 5 5 5 5 5 4 4 4 4 3 3 3 3 3)</code></pre></sub>
+            </div>
+            <div>
+                <div><img src="./chapter-10/before.png" width="100%" alt="Un arbre binaires étiqueté." /></div>
+                <div><img src="./chapter-10/after.png" width="100%" alt="Un arbre binaires étiqueté." /></div>
+                <p>Ceci suggère qu'il devrait exister une variante de <code>pre-trav</code> qui, appliquée à
+                    un tas, fournirait la liste triée des étiquettes de ce tas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide">
+        <h3>Arbres, tas et tri VI</h3>
+        
+        <sub><pre><code class="language-scheme">(define hp-sort-trav ;; liste triée des étiquettes 
+  (lambda (hp)
+    (if (e-tree? hp)
+        '()
+        (let ((u1 (hp-sort-trav (left hp)))
+              (u2 (hp-sort-trav (right hp))))
+          (cons (key hp) (merge u1 u2))))))
+
+(define merge ;; fusion de deux listes triées 
+  (lambda (u1 u2)
+    (cond ((null? u1) u2)
+          ((null? u2) u1)
+          (else (let ((a1 (car u1)) (a2 (car u2)))
+                  (if (&gt; a1 a2)
+                      (cons a1 (merge (cdr u1) u2))
+                      (cons a2 (merge u1 (cdr u2)))))))))</code></pre></sub>
+
+      <br />
+      
+      <p>Cette technique de tri est raisonnablement efficace.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Visualisation de la structure des arbres</h3>
+        
+        <sub><pre><code class="language-scheme">(define space      ;; (space n) ecrit n blancs
+  (lambda (n)
+    (if (zero? n)
+        (display "")
+        (begin (display " ") (space (- n 1))))))
+
+(define add1 (lambda (x) (+ x 1)))
+
+(define pr-tree-iter
+  (lambda (tr d)
+    (if (e-tree? tr)
+        (begin (space d) (display " -"))
+        (let ((d1 (add1 d)))
+          (begin (space d1) (display (key tr))
+                 (newline) (pr-tree-iter (left tr) d1)
+                 (newline) (pr-tree-iter (right tr) d1))))))
+
+(define pr-tree (lambda (tr) (pr-tree-iter tr 0)))</code></pre></sub>
+
+      <br />
+      
+      <p>Cette technique de tri est raisonnablement efficace.</p>
+    </section>
+
+    <section class="slide">
+        <h3>Enregistrements, réalisation concrète I</h3>
+        
+        <p>Les $K$-arbres binaires complètement étiquetés sont des cas particuliers d'enregistrements. Un enregistrement est une
+            structure de donnée admettant un nombre fixé de composants, chacun d'eux ayant un type donné.</p>
+        
+        <p class="specification">Le reconnaisseur <code>record?</code> prend comme arguments un objet [[<code>u</code>]] 
+            et une liste de propriétés [[<code>lp</code>]] 
+            et renvoie <code>#t</code> si [[<code>u</code>]] et [[<code>lp</code>]] 
+            sont des listes de même longueur $l$ et si pour tout $i = 1,...,l$, le ième objet de 
+            [[<code>u</code>]] satisfait la ième propriété de [[<code>lp</code>]].</p>
+        
+        <p>Remarque. Une propriété est ici un prédicat à un argument.</p>
+        
+        <p>Une solution simple et efficace est</p>
+
+        <sub><pre><code class="language-scheme">(define record?
+  (lambda (u lp)
+    (or (and (null? u) (null? lp))
+        (and (pair? u) (pair? lp) ((car lp) (car u))
+             (record? (cdr u) (cdr lp))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Enregistrements, réalisation concrète II</h3>
+        
+        <p>Le reconnaisseur <code>k-tree?</code> introduit plus haut, à savoir</p>
+
+        <sub><pre><code class="language-scheme">(define k-tree?
+  (lambda (x)  ;; x est un objet quelconque
+    (and (pair? x) (key? (car x))
+         (pair? (cdr x)) (ek-tree? (cadr x))
+         (pair? (cddr x)) (ek-tree? (caddr x))
+         (null? (cdddr x)))))
+; remember: (define e-tree? null?)
+; remember: (define ek-tree? (lambda (x) (or (e-tree? x) (k-tree? x))))
+; remember: (define key? (lambda (x) (and (integer? x) (&gt;= x 0))))</code></pre></sub>
+
+        <br />
+
+        <p>pourrait aussi se définir en utilisant <code>record?</code> :</p>
+
+        <sub><pre><code class="language-scheme">(define k-tree?
+            (lambda (u)
+              (record? u
+                       (list (lambda (x) (and (integer? x) (&gt;= x 0)))
+                             (lambda (v) (or (null? v) (k-tree? v)))
+                             (lambda (v) (or (null? v) (k-tree? v)))))))</code></pre></sub>
+    </section>
+
+    <section class="slide">
+        <h3>Les graphes I</h3>
+
+        <div class="columns two">
+          <sub><pre><code class="language-scheme">(define *g0*
+  '((a b c d e f) .
+    ((b . a) (b . d) (c . b) (d . c)
+     (d . f) (e . b) (e . f) (f . a))))</code></pre></sub>
+          <div><img src="./chapter-10/g0.png" width="60%" alt="Directed graph." /></div>
+        </div>
+
+        <sub><pre><code class="language-scheme">(define mk-graph (lambda (nodes arcs) (cons nodes arcs)))
+
+(define nodes (lambda (gr) (car gr)))
+
+(define arcs (lambda (gr) (cdr gr)))
+
+(define mk-arc (lambda (org ext) (cons org ext)))
+
+(define org (lambda (arc) (car arc)))
+
+(define ext (lambda (arc) (cdr arc)))</code></pre></sub>
+    </section>
+
+  <section class="slide">
+    <h3>Les graphes II</h3>
+    
+    <p>Successeurs d'un nœud dans un graphe</p>
+    <sub><pre><code class="language-scheme">(define succs
+  (lambda (nd gr)
+    (let ((nodes (nodes gr)) (arcs (arcs gr)))
+      (if (member nd nodes)
+          (succs-arcs nd arcs)
+          (error "unknown node" nd)))))
+
+(define succs-arcs
+  (lambda (nd arcs)
+    (cond ((null? arcs) '())
+          ((equal? (org (car arcs)) nd)
+           (add-elem (ext (car arcs)) (succs-arcs nd (cdr arcs))))
+          (else (succs-arcs nd (cdr arcs))))))
+
+(define add-elem
+  (lambda (x l) (if (member x l) l (cons x l))))</code></pre></sub>
+
+    <sub>
+      <pre class="input"><code class="language-scheme">&gt; (succs 'a *g0*)</code></pre>
+      <pre class="output"><code class="language-">()</code></pre>
+      <pre class="input"><code class="language-scheme">&gt; (succs 'b *g0*)</code></pre>
+      <pre class="output"><code class="language-">(a d)</code></pre>
+    </sub>
+  </section>
+
+  <section class="slide">
+    <h3>Les graphes III</h3>
+
+    <p>Descendance d'un noeud dans un graphe, version très naive car la terminaison n'est pas garantie !</p>
+
+    <p>Pourquoi?</p>
+
+    <sub><pre class="error"><code class="language-scheme">(define naive_offspring
+  (lambda (nd gr)
+    (add-elem nd (naive_offspring* (succs nd gr) gr))))
+
+(define naive_offspring*
+  (lambda (nd* gr)
+    (if (null? nd*)
+        '()
+        (union (naive_offspring (car nd*) gr) (naive_offspring* (cdr nd*) gr)))))</code></pre></sub>
+
+    <br />
+
+    <p>Attention : petites fautes dans le livre aux niveau des parenthèses.</p>
+  </section>
+
+  <section class="slide">
+    <h3>Les graphes IV</h3>
+
+    <p>Descendance d'un noeud dans un graphe, version naive :</p>
+
+    <sub><pre><code class="language-scheme">(define offspring 
+  (lambda (nd gr) (off nd gr (length (nodes gr)))))
+
+(define off
+  (lambda (nd gr k)
+    (if (= k 0) '() (add-elem nd (off* (succs nd gr) gr (- k 1))))))
+
+(define off*
+  (lambda (nd* gr k)
+    (if (null? nd*)
+        '()
+        (union (off (car nd*) gr k) (off* (cdr nd*) gr k)))))
+
+(define union
+  (lambda (u v)
+    (if (null? u) v (add-elem (car u) (union (cdr u) v)))))</code></pre></sub>
+
+    <sub>
+      <pre class="input"><code class="language-scheme">&gt; (offspring 'c *g0*)</code></pre>
+      <pre class="output"><code class="language-">(c b d f a)</code></pre>
+      <pre class="input"><code class="language-scheme">&gt; (succs 'b *g0*)</code></pre>
+      <pre class="output"><code class="language-">(a d)</code></pre>
+    </sub>
+  </section>
+
+  <section class="slide">
+    <h3>Les graphes V</h3>
+    
+    <p>Descendance d'un nœud dans un graphe, deuxième solution</p>
+    <sub><pre><code class="language-scheme">
+(define offspring-bis
+  (lambda (nd gr)
+    (off*-bis (list nd) gr '())))
+    
+(define off*-bis
+  (lambda (nd* gr acc)
+    (cond ((null? nd*) acc)
+          ((member (car nd*) acc)
+           (off*-bis (cdr nd*) gr acc))
+          (else
+           (off*-bis (append (succs (car nd*) gr) (cdr nd*))
+                     gr
+                     (cons (car nd*) acc))))))</code></pre></sub>
+  </section>
+
+  <section class="slide">
+    <h3>Les graphes VI</h3>
+    
+    <p>Une troisième version plus efficace s'obtient en  éliminant l'usage de <code>append</code> :</p>
+    
+    <sub><pre><code class="language-scheme">(define offspring-ter
+  (lambda (nd gr) (off-ter nd gr '())))
+
+(define off-ter
+  (lambda (nd gr acc)
+    (if (member nd acc) acc (off*-ter (succs nd gr) gr (cons nd acc)))))
+
+(define off*-ter
+  (lambda (nd* gr acc)
+    (cond ((null? nd*) acc)
+          ((member (car nd*) acc)
+           (off*-ter (cdr nd*) gr acc))
+          (else
+           (off-ter (car nd*)
+                    gr
+                    (off*-ter (cdr nd*) gr acc))))))</code></pre></sub>
+  </section>
+
+  <section class="slide">
+    <h3>Les graphes VII</h3>
+    
+    <p>Essais : dans [[<code>*g0*</code>]], on a les arcs</p>
+    
+    <sub><pre><code class="language-scheme">c-&gt;b  b-&gt;a
+      b-&gt;d d-&gt;c
+           d-&gt;f f-&gt;a</code></pre></sub>
+
+    <br />
+
+    <p>donc la descendance de [[<code>c</code>]] dans [[<code>*g0*</code>]] comporte [[<code>a</code>]], 
+      [[<code>b</code>]], [[<code>c</code>]], [[<code>d</code>]] et [[<code>f</code>]].</p>
+
+
+    <p>On a effiectivement :</p>
+
+    <pre class="input"><code class="language-scheme">&gt; (offspring 'c *g0*)</code></pre>
+    <pre class="output"><code class="language-">(c b d f a)</code></pre>
+    <pre class="input"><code class="language-scheme">&gt; (offspring 'c *g0*)</code></pre>
+    <pre class="output"><code class="language-">(f d a b c)</code></pre>
+    <pre class="input"><code class="language-scheme">&gt; (offspring-ter 'c *g0*)</code></pre>
+    <pre class="output"><code class="language-">(a f d b c)</code></pre>
+  </section>
 
     <div class="progress"></div>
 
