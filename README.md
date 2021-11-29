@@ -5,7 +5,7 @@ Feel free to ask questions [on GitHub](https://github.com/chrdebru/INFO0054).
 ## Informations
 
 * [Engagement pédagogique](https://www.programmes.uliege.be/cocoon/20212022/cours/INFO0054-1.html). 
-* Page des répétitions et travaux dirigés 2021-2022 (TBD)
+* Page des répétitions et travaux dirigés 2021-2022 (sur eCampus)
 
 ## Transparents
 
@@ -19,9 +19,10 @@ Feel free to ask questions [on GitHub](https://github.com/chrdebru/INFO0054).
 * [Chapitre 08 : Expressions symboliques](chapter-08.html)
 * [Chapitre 09 : Abstraction et blocs](chapter-09.html)
 * [Chapitre 10 : Abstraction sur les données](chapter-10.html)
-* [Chapitre 11 : Un exercice de programmation](chapter-11.html)
-* [Chapitre 12 : Abstraction procédurale](chapter-12.html)
-* [Chapitre 13 : Abstraction procédurale, exemple](chapter-13.html)
-* [Chapitre 14 : Les vecteurs](chapter-14.html)
-* [Chapitre 15 : Mécanismes particuliers, tabulation](chapter-15.html)
+* [Chapitre 11 : Un exercice de programmation](chapter-11.pdf) (vieux transparents)
+* [Chapitre 12 : Abstraction procédurale](chapter-12.pdf) (vieux transparents)
+* [Chapitre 13 : Abstraction procédurale, exemple](chapter-13.pdf) (vieux transparents)
+* [Chapitre 14 : Les vecteurs](chapter-14.pdf)
+* [Chapitre 14bis : Filtrage par motif et quasiquotes](chapter-14-bis.pdf)
+* [Chapitre 15 : Mécanismes particuliers: tabulation et memoisation](chapter-15.pdf)
 
